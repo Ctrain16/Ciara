@@ -1,5 +1,6 @@
 import discord
 import os
+import config
 from discord import client
 from discord.ext import commands
 
@@ -8,7 +9,7 @@ intents.members = True
 
 description = 'C.I.A.R.A. = Cal\'s Intelligent And Responsive Automaton'
 
-bot = commands.Bot(command_prefix='c ', intents=intents, description=description)
+bot = commands.Bot(command_prefix=config.myBot['prefix'], intents=intents, description=description)
 
 @bot.event
 async def on_ready():
@@ -37,4 +38,4 @@ for filename in os.listdir('./cogs'):
         bot.load_extension(f'cogs.{filename[:-3]}')
 
 
-bot.run('Nzk1MTU2NjAzMjk2ODA5MDAx.X_FRSw.8meOJDoGKYvVnNCO06ENZMThxHw')
+bot.run(config.myBot['token'])
