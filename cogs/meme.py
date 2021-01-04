@@ -34,8 +34,7 @@ class Meme(commands.Cog):
 
     @commands.command(description='Talks trash about a specified member', aliases=['insult'])
     async def chirp(self,ctx,member : discord.Member):
-        insults = ['a milkbag',
-                    'mom\'s a hoe',
+        insults = ['a milkbag'
                     'freer than Mcdonald\'s wifi',
                     'a snollygoster',
                     'a pillick',
@@ -46,13 +45,12 @@ class Meme(commands.Cog):
                     'a dingbat',
                     'an arsehole',
                     'a literal cow',
-                    'a dumbass hoe',
                     'a twat',
                     'a lickspittle',
                     'a ninny',
                     'a simpleton',
                     'a fartface',
-                    'a bum... also you cannot aim worth shit',
+                    'a bum',
                     'a ninnyhammer',
                     'a mumpsimus',
                     'a pettifogger',
