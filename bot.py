@@ -1,15 +1,16 @@
-import discord
 import os
-import config
-from discord import client
+
+import discord
 from discord.ext import commands
+
+import config as ciara
 
 intents = discord.Intents.default()
 intents.members = True
 
 description = 'C.I.A.R.A. = Cal\'s Intelligent And Responsive Automaton'
 
-bot = commands.Bot(command_prefix=config.myBot['prefix'], intents=intents, description=description)
+bot = commands.Bot(command_prefix=ciara.discord_secrets['prefix'], intents=intents, description=description)
 
 @bot.event
 async def on_ready():
@@ -34,8 +35,8 @@ async def reload(ctx, extension):
 
 #Loads all cogs
 for filename in os.listdir('./cogs'):
-    if filename.endswith('.py'):
+    if filename.endswith('.py') and filename != 'config.py':
         bot.load_extension(f'cogs.{filename[:-3]}')
 
 
-bot.run(config.myBot['token'])
+bot.run(ciara.discord_secrets['token'])
