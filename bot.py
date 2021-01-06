@@ -22,16 +22,18 @@ async def on_ready():
 @bot.command(hidden=True)
 async def load(ctx, extension):
     bot.load_extension(f'cogs.{extension}')
+    print(f'loaded {extension}')
 
 @bot.command(hidden=True)
 async def unload(ctx, extension):
     bot.unload_extension(f'cogs.{extension}')
+    print(f'unloaded {extension}')
 
 @bot.command(hidden=True)
 async def reload(ctx, extension):
     bot.unload_extension(f'cogs.{extension}')
     bot.load_extension(f'cogs.{extension}')
-
+    print(f'reloaded {extension}')
 
 #Loads all cogs
 for filename in os.listdir('./cogs'):

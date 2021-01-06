@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from discord.utils import get
 
-default_role = 'member'
+default_role = ''
 
 class Basic(commands.Cog):
 
@@ -12,11 +12,15 @@ class Basic(commands.Cog):
     #Events
     @commands.Cog.listener()
     async def on_member_join(self, member):
+        global default_role
         guild = member.guild
+
         if guild.system_channel is not None:
             await guild.system_channel.send('Welcome {0.mention}, to {1.name}!'.format(member, guild))
-        role = get(member.guild.roles, name=default_role)
-        await member.add_roles(role)
+        
+        if default_role != '':
+            role = get(member.guild.roles, name=default_role)
+            await member.add_roles(role)
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
