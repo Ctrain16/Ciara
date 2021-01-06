@@ -14,7 +14,7 @@ bot = commands.Bot(command_prefix=ciara.discord_secrets['prefix'], intents=inten
 
 @bot.event
 async def on_ready():
-    await bot.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.listening, name = 'to my creator'))
+    await bot.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.listening, name = 'my creator'))
     print('Bot is ready.')
 
 
