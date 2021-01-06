@@ -3,6 +3,8 @@ import random
 import discord
 from discord.ext import commands
 
+import config as ciara
+
 class Fun(commands.Cog):
 
     def __init__(self, bot):
@@ -35,7 +37,11 @@ class Fun(commands.Cog):
 
     @commands.command(description='Talks trash about a specified member', aliases=['insult'])
     async def chirp(self,ctx,member : discord.Member):
-        insults = ['a milkbag'
+        insults = ['a milkbag',
+                    'dogwater',
+                    'freer than a costco sample',
+                    'mom is a hoe',
+                    'a jett main with a 0.5 k.d.',
                     'freer than Mcdonald\'s wifi',
                     'a snollygoster',
                     'a pillick',
@@ -57,9 +63,16 @@ class Fun(commands.Cog):
                     'a pettifogger',
                     'a mooncalf',]
         
-        #My member id... Ciara will never chirp me :)
-        if member.id == 327627829221261312:
-            await ctx.send('I shall not insult my creator :)')
+        #Ciara doesn't chirp her friends
+        member_is_friend = 0
+        for id in ciara.ciaras_friends_ids:
+            if member.id == int(id):
+                member_is_friend = 1
+            
+        if member_is_friend:
+            await ctx.send('I do not chirp my friends :)')
+        elif member.id == int(ciara.discord_secrets['ciara_id']):
+            await ctx.send('Why would I chirp myself?')
         else:
             await ctx.send('{0.mention}... you\'re '.format(member) + f'{random.choice(insults)}')
 
