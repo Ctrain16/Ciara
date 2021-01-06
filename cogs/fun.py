@@ -11,7 +11,11 @@ class Fun(commands.Cog):
         self.bot = bot
 
     #Commands
-    @commands.command(description='Answers a question', aliases=['8ball','8'])
+    @commands.command(
+        name='eightball',
+        description='Answers a question', 
+        aliases=['8ball','8']
+    )
     async def eightball(self,ctx,*,question):
         eightball_responses = ['It is certain.',
                                 'It is decidedly so.',
@@ -35,7 +39,12 @@ class Fun(commands.Cog):
                                 'Very doubtful.']
         await ctx.send(f'{random.choice(eightball_responses)}')
 
-    @commands.command(description='Talks trash about a specified member', aliases=['insult'])
+
+    @commands.command(
+        name='chirp',
+        description='Talks trash about a specified member', 
+        aliases=['insult']
+    )
     async def chirp(self,ctx,member : discord.Member):
         insults = ['a milkbag',
                     'dogwater',
@@ -75,6 +84,24 @@ class Fun(commands.Cog):
             await ctx.send('Why would I chirp myself?')
         else:
             await ctx.send('{0.mention}... you\'re '.format(member) + f'{random.choice(insults)}')
+
+    
+    @commands.command(
+        name='dice',
+        description='Rolls dice\n\nControlled using #dice(d)#sides\nSo if you want to roll 2, 6-sided dice then you would enter 2d6 in place of <dice>',
+        aliases=['roll','rd']
+    )
+    async def dice(self,ctx,dice):
+        dice_info = dice.split('d')
+        num_dice = int(dice_info[0])
+        num_sides = int(dice_info[1])
+
+        all_rolls = ''
+        for x in range(num_dice):
+            all_rolls = all_rolls + f"dice {x + 1} : " + str(random.randint(1,num_sides)) + "\n"
+
+        await ctx.send(all_rolls)
+
 
 def setup(bot):
     bot.add_cog(Fun(bot))
