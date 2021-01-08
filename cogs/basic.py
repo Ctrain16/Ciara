@@ -46,8 +46,15 @@ class Basic(commands.Cog):
         aliases=['delete','del'],
     )
     async def clear(self,ctx,number_messages : int):
-        await ctx.channel.purge(limit=number_messages)
-        print(f'Basic: Removed {number_messages}')
+        user = ctx.message.author
+        user_permissions = user.guild_permissions
+
+        if user_permissions.manage_messages:
+            await ctx.channel.purge(limit=number_messages)
+            print(f'Basic: Removed {number_messages}\n')
+        else:
+            await ctx.send(f'{user.mention} sorry, it seems you do not have permission to use this command :(')
+            print(f'Basic: User does not have permission to execute command\n')
 
 
     @commands.command(
