@@ -40,20 +40,41 @@ class Basic(commands.Cog):
 
 
     #Commands
-    @commands.command(description='Evaluates a math equation', aliases=['c','calc','math'])
+    @commands.command(
+        name='clear',
+        description='Deletes a specified number of messages from the channel',
+        aliases=['delete','del'],
+    )
+    async def clear(self,ctx,number_messages : int):
+        await ctx.channel.purge(limit=number_messages)
+        print(f'Basic: Removed {number_messages}')
+
+
+    @commands.command(
+        name='compute',
+        description='Evaluates a math equation', 
+        aliases=['c','calc','math']
+    )
     async def compute(self,ctx,*,equation):
         await ctx.send(f'{eval(equation)} = {equation}')
         print(f'Basic: computed the following equation : {equation}\n')
 
 
-    @commands.command(description='Retrieves latency of bot')
+    @commands.command(
+        name='ping',
+        description='Retrieves latency of bot'
+    )
     async def ping(self,ctx):
         latency = round(self.bot.latency * 1000)
         await ctx.send(f'{latency}ms')
         print(f'Basic: Ping = {latency}\n')
 
 
-    @commands.command(description='Sets default role to assign to new members', aliases=['set default role','setDefRole','sdr'])
+    @commands.command(
+        name='role',
+        description='Sets default role to assign to new members', 
+        aliases=['set default role','setDefRole','sdr']
+    )
     async def role(self,ctx,role : discord.Role):
         global default_role
         default_role = role
