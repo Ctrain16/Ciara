@@ -1,4 +1,4 @@
-import os
+import os, urllib.parse, urllib.request, re
 
 import discord
 from discord.ext import commands
@@ -9,31 +9,43 @@ class Music(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        
 
 
     @commands.command(
         name='play',
-        description='Plays audio',
+        description='Plays requested song\n\n<song_request> can either be a url or a title which will be searched for on youtube',
         aliases=['p']
     )
-    async def join(self,ctx, url : str):
+    async def play(self,ctx,*,song_request):
+
+        #Functions as resume command when no url is passed
+        if song_request == '':
+            await ctx.invoke(self.bot.get_command('resume'))
+            return
+
+        #Removes old song file if not in use
         song_file = os.path.isfile('song.mp3')
         try:
             if song_file:
                 os.remove('song.mp3')
+                print('Music: Removed old song file\n')
         except PermissionError:
             #Add queue structure... also need to add skip command 
-            await ctx.send('A song is already playing\n')
+            print('Music: A new song was requested while the current song is playing')
+            await ctx.send('Music: A song is already playing\n')
+            return
 
-        channel = ctx.message.author.voice.channel
-        voice = get(self.bot.voice_clients, guild = ctx.guild)
+        #Search for song on youtube and get url
+        search_query = urllib.parse.urlencode({'search_query': song_request})
+        htm_content = urllib.request.urlopen(
+            'http://www.youtube.com/results?' + search_query
+        )
+        search_results = re.findall(r'/watch\?v=(.{11})', htm_content.read().decode())
+        song_url = 'http://www.youtube.com/watch?v=' + search_results[0]
+        print(f'Music: {song_url}')
 
-        if voice and voice.is_connected:
-            await voice.move_to(channel)
-        else:
-            voice = await channel.connect()
-
-
+        #Download song
         ydl_opts = {
             'format': 'bestaudio/best',
             'postprocessors': [{
@@ -42,17 +54,34 @@ class Music(commands.Cog):
                 'preferredquality': '192',
             }],
         }
-
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-            ydl.download([url])
+            ydl.download([song_url])
 
+        #Change file name and retrieves title from file name
+        song_title = ''
         for file in os.listdir('./'):
             if file.endswith('.mp3'):
+                song_title = file
+                print(f'Music: Renamed file {file} to song.mp3\n')
                 os.rename(file, 'song.mp3')
         
-        voice.play(discord.FFmpegPCMAudio('song.mp3'))
+        #Join Channel & begin playing
+        channel = ctx.message.author.voice.channel
+        voice = get(self.bot.voice_clients, guild = ctx.guild)
+        if voice and voice.is_connected:
+            await voice.move_to(channel)
+        else:
+            voice = await channel.connect()
+        voice.play(
+            discord.FFmpegPCMAudio('song.mp3'), 
+            after=lambda e:ctx.invoke(self.bot.get_command('dc'))
+        )
 
-        print(f'Ciara connected to {channel} and began playing music\n')
+        #Prints confirmation
+        length_to_slice = len(search_results[0]) + 5
+        song_title = song_title[:-length_to_slice]
+        print(f'Music: Ciara connected to {channel} and began playing: {song_title}\n')
+        await ctx.send(f'Began playing : {song_title}')
 
 
     @commands.command(
@@ -66,7 +95,7 @@ class Music(commands.Cog):
 
         if voice and voice.is_connected and voice.channel == user_channel:
             await voice.disconnect()
-            print(f'Ciara disconnected from {voice.channel}\n')
+            print(f'Music: Ciara disconnected from {voice.channel}\n')
 
     
     @commands.command(
