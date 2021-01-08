@@ -15,25 +15,35 @@ bot = commands.Bot(command_prefix=ciara.discord_secrets['prefix'], intents=inten
 @bot.event
 async def on_ready():
     await bot.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.listening, name = 'my creator'))
-    print('Bot is ready.')
+    print(f'{bot.user.name} is ready.\n')
+
+
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.CommandNotFound):
+                await ctx.send('Error: Command was not found')
+                print('Error: Command was not found\n')
 
 
 #Hidden commands for development purposes
 @bot.command(hidden=True)
 async def load(ctx, extension):
     bot.load_extension(f'cogs.{extension}')
-    print(f'loaded {extension}')
+    print(f'loaded {extension}\n')
+
 
 @bot.command(hidden=True)
 async def unload(ctx, extension):
     bot.unload_extension(f'cogs.{extension}')
-    print(f'unloaded {extension}')
+    print(f'unloaded {extension}\n')
+
 
 @bot.command(hidden=True)
 async def reload(ctx, extension):
     bot.unload_extension(f'cogs.{extension}')
     bot.load_extension(f'cogs.{extension}')
-    print(f'reloaded {extension}')
+    print(f'reloaded {extension}\n')
+
 
 #Loads all cogs
 for filename in os.listdir('./cogs'):
