@@ -116,6 +116,7 @@ class Music(commands.Cog):
 
         if voice and voice.is_connected and voice.channel == user_channel:
             await voice.disconnect()
+            await ctx.invoke(self.bot.get_command('clearqueue'))
             print(f'Music: Ciara disconnected from {voice.channel}\n')
 
     
@@ -154,12 +155,13 @@ class Music(commands.Cog):
     async def stop(self,ctx):
         voice = get(self.bot.voice_clients, guild = ctx.guild)
         voice.stop()
+        await ctx.invoke(self.bot.get_command('clearqueue'))
         print('Music: stopped\n')
 
     
     @commands.command(
         name='queue',
-        aliases=['q']
+        hidden=True
     )
     async def queue(self,ctx,song_request):
         global song_queue
@@ -190,6 +192,19 @@ class Music(commands.Cog):
         }
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             ydl.download([song_url])
+
+
+    @commands.command(
+        name='clearqueue',
+        description='Clears the song queue',
+        aliases=['emptyqueue']
+    )
+    async def clear_queue(self,ctx):
+        for file in os.listdir('./'):
+            if file.endswith('.mp3'):
+                os.remove(file)
+        print('Music: queue cleared\n')
+        await ctx.send('The song queue was cleared')   
 
 
 def setup(bot):
