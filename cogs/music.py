@@ -116,8 +116,10 @@ class Music(commands.Cog):
 
         if voice and voice.is_connected and voice.channel == user_channel:
             await voice.disconnect()
+            await ctx.send(f'Disconnected from {voice.channel}')
             await ctx.invoke(self.bot.get_command('clearqueue'))
             print(f'Music: Ciara disconnected from {voice.channel}\n')
+        print('Music: Ciara cannot disconnect as she is not connected to any channel\n')
 
     
     @commands.command(
@@ -130,8 +132,10 @@ class Music(commands.Cog):
         if voice.is_playing():
             voice.pause()
             print('Music: paused\n')
+            await ctx.send('Paused')
         else:
             print('Music: no music to pause\n')
+            await ctx.send('Nothing to pause')
 
     
     @commands.command(
@@ -150,14 +154,27 @@ class Music(commands.Cog):
 
     
     @commands.command(
-        name='stop'
+        name='stop',
+        description='Stop current song and clears queue',
     )
     async def stop(self,ctx):
         voice = get(self.bot.voice_clients, guild = ctx.guild)
-        voice.stop()
         await ctx.invoke(self.bot.get_command('clearqueue'))
+        voice.stop()
+        await ctx.send('Music was stopped')
         print('Music: stopped\n')
 
+    
+    @commands.command(
+        name='skip',
+        description='Skips current song',
+    )
+    async def skip(self,ctx):
+        voice = get(self.bot.voice_clients, guild = ctx.guild)
+        voice.stop()
+        await ctx.send('Skipped')
+        print('Music: skipped song\n')
+    
     
     @commands.command(
         name='queue',
@@ -200,9 +217,18 @@ class Music(commands.Cog):
         aliases=['emptyqueue']
     )
     async def clear_queue(self,ctx):
+        global song_queue
+
+        voice = get(self.bot.voice_clients, guild = ctx.guild)
         for file in os.listdir('./'):
             if file.endswith('.mp3'):
-                os.remove(file)
+                if voice.is_playing() and file == 'song.mp3':
+                    print('Song is playing and will not be removed from queue\n')
+                else:
+                    os.remove(file)
+                    if len(song_queue) > 0:
+                        song_queue.pop(0)
+
         print('Music: queue cleared\n')
         await ctx.send('The song queue was cleared')   
 
