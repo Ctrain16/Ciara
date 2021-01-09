@@ -38,6 +38,7 @@ class Fun(commands.Cog):
                                 'Outlook not so good.',
                                 'Very doubtful.']
         await ctx.send(f'{random.choice(eightball_responses)}')
+        print('Fun: the 8ball was asked a question\n')
 
 
     @commands.command(
@@ -84,6 +85,8 @@ class Fun(commands.Cog):
             await ctx.send('Why would I chirp myself?')
         else:
             await ctx.send('{0.mention}... you\'re '.format(member) + f'{random.choice(insults)}')
+        
+        print(f'Fun: {member.name} was chirped\n')
 
     
     @commands.command(
@@ -101,6 +104,21 @@ class Fun(commands.Cog):
             all_rolls = all_rolls + f"dice {x + 1} : " + str(random.randint(1,num_sides)) + "\n"
 
         await ctx.send(all_rolls)
+        print(f'Fun: Dice roll... {dice}\n')
+
+
+    @commands.command(
+        name='coin',
+        description='Flips a coin',
+        aliases=['flipcoin','flip'],
+    )
+    async def coin(self,ctx):
+        coin_flip = random.randint(1,2)
+        if coin_flip == 1:
+            await ctx.send('Heads')
+        else:
+            await ctx.send('Tails')
+        print(f'Fun: A coin was flipped, result was {coin_flip}\n')
 
 
 def setup(bot):
