@@ -2,6 +2,7 @@ import random
 
 import discord
 from discord.ext import commands
+from discord.ext.commands.cooldowns import BucketType
 
 import config as ciara
 
@@ -16,6 +17,7 @@ class Fun(commands.Cog):
         description='Answers a question', 
         aliases=['8ball','8']
     )
+    @commands.cooldown(1, 15, BucketType.user)
     async def eightball(self,ctx,*,question):
         eightball_responses = ['It is certain.',
                                 'It is decidedly so.',
