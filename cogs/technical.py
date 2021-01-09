@@ -1,11 +1,13 @@
 from asyncio.windows_events import NULL
+
 import discord
 from discord.ext import commands
-from discord.utils import get
+
 
 default_role : discord.Role = NULL
 
-class Basic(commands.Cog):
+
+class Technical(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
@@ -31,6 +33,7 @@ class Basic(commands.Cog):
             await member.add_roles(default_role)
             print(f'Basic: {member} was given the {default_role.name} role.\n')
 
+
     @commands.Cog.listener()
     async def on_member_remove(self, member):
         guild = member.guild
@@ -41,20 +44,14 @@ class Basic(commands.Cog):
 
     #Commands
     @commands.command(
-        name='clear',
+        name='deletemessages',
         description='Deletes a specified number of messages from the channel',
-        aliases=['delete','del'],
+        aliases=['delete','clear','cm'],
     )
+    @commands.has_permissions(manage_messages=True)
     async def clear(self,ctx,number_messages : int):
-        user = ctx.message.author
-        user_permissions = user.guild_permissions
-
-        if user_permissions.manage_messages:
-            await ctx.channel.purge(limit=number_messages)
-            print(f'Basic: Removed {number_messages}\n')
-        else:
-            await ctx.send(f'{user.mention} sorry, it seems you do not have permission to use this command :(')
-            print(f'Basic: User does not have permission to execute command\n')
+        await ctx.channel.purge(limit=number_messages)
+        print(f'Basic: Removed {number_messages}\n')
 
 
     @commands.command(
@@ -90,4 +87,4 @@ class Basic(commands.Cog):
 
     
 def setup(bot):
-    bot.add_cog(Basic(bot))
+    bot.add_cog(Technical(bot))
