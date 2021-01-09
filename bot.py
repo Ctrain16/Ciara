@@ -25,9 +25,18 @@ async def on_ready():
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
-                await ctx.send('Error: Command was not found')
-                print('Error: Command was not found\n')
-    print(error)
+        await ctx.send(f'Error: {error}')
+
+    elif isinstance(error, commands.MissingPermissions):
+        await ctx.send(f'Error: {error}')
+
+    elif isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send(f'Error: {error}')
+
+    elif isinstance(error, commands.CommandOnCooldown):
+        await ctx.send(f'Error: {error}')
+
+    print(f'Error: {error}')
 
 
 def is_it_developer(ctx):
