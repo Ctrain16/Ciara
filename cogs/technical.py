@@ -50,7 +50,7 @@ class Technical(commands.Cog):
     )
     @commands.has_permissions(manage_messages=True)
     async def clear(self,ctx,number_messages : int):
-        await ctx.channel.purge(limit=number_messages)
+        await ctx.channel.purge(limit=number_messages + 1)
         print(f'Basic: Removed {number_messages}\n')
 
 
