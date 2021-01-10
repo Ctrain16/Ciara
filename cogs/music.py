@@ -1,11 +1,14 @@
 import asyncio
-import os, urllib.parse, urllib.request, re, shutil
+import os, urllib.parse, urllib.request, re
 
 import discord
+from discord import channel
 from discord.ext import commands
 from discord.utils import get
 import youtube_dl
 import validators
+
+import config as ciara
 
 song_queue = []
 song_queue_urls = []
@@ -16,6 +19,24 @@ class Music(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         
+
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if message.author == self.bot.user:
+            return
+
+        if message.content.startswith(ciara.discord_secrets['prefix']):
+            return
+
+        channel = message.channel
+        server = message.guild
+
+        for key in ciara.music_channels:
+            if key == str(server.id):
+                if ciara.music_channels[key] == str(channel.id):
+                    ctx = await self.bot.get_context(message)
+                    await ctx.invoke(self.bot.get_command('play'), song_request=message.content)
+
 
     @commands.command(
         name='play',
@@ -48,7 +69,6 @@ class Music(commands.Cog):
         def check_queue(error):
             if len(song_queue) > 0:
                 end_of_file_name = song_queue.pop(0)
-                print(end_of_file_name)
                 os.remove('current-song.mp3')
                 print('Music: Removed old song file\n')
 
@@ -115,6 +135,73 @@ class Music(commands.Cog):
         #Prints confirmation
         print(f'Music: Ciara connected to {channel} and began playing: {song_url}\n')
         await ctx.send(f'Began playing : {song_url}')
+
+
+    @commands.command(
+        name='queue',
+        hidden=True
+    )
+    async def queue(self,ctx,song_request):
+        global song_queue, song_queue_urls, queue_count
+
+        #Check if request is url (but not youtube url)... if it isn't then search for song on youtube and get url
+        song_url = ''
+        search_results = ''
+        if validators.url(song_request) and song_request.find('youtube') == -1:
+            song_url = song_request
+        else:
+            search_query = urllib.parse.urlencode({'search_query': song_request})
+            htm_content = urllib.request.urlopen(
+                'http://www.youtube.com/results?' + search_query
+            )
+            search_results = re.findall(r'/watch\?v=(.{11})', htm_content.read().decode())
+            song_url = 'http://www.youtube.com/watch?v=' + search_results[0]
+
+        #Download song
+        song_file_name = f'song{queue_count}.mp3'
+        ydl_opts = {
+            'format': 'bestaudio/best',
+            'outtmpl': song_file_name,
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'mp3',
+                'preferredquality': '192',
+            }],
+        }
+        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([song_url])
+
+        song_queue.append(song_file_name)
+        song_queue_urls.append(song_url)
+        queue_count += 1
+
+        print(f'Music: {song_request} was added to the queue\n')
+        print(f'Music: Queue -> {song_queue}\n')
+        await ctx.send(f'{song_request} was added to the queue\n')        
+
+
+    @commands.command(
+        name='clearqueue',
+        description='Clears the song queue',
+        aliases=['emptyqueue']
+    )
+    async def clear_queue(self,ctx):
+        global song_queue, song_queue_urls, queue_count
+
+        voice = get(self.bot.voice_clients, guild = ctx.guild)
+        for file in os.listdir('./'):
+            if file.endswith('.mp3'):
+                if voice.is_playing() and file == 'current-song.mp3':
+                    print('Song is playing and will not be removed from queue\n')
+                else:
+                    os.remove(file)
+                    if len(song_queue) > 0:
+                        song_queue.pop(0)
+                        song_queue_urls.pop(0)
+                        queue_count -= 1
+
+        print('Music: queue cleared\n')
+        await ctx.send('The song queue was cleared')   
 
 
     @commands.command(
@@ -188,72 +275,19 @@ class Music(commands.Cog):
         await ctx.send('Skipped')
         print('Music: skipped song\n')
     
-    
-    @commands.command(
-        name='queue',
-        hidden=True
-    )
-    async def queue(self,ctx,song_request):
-        global song_queue, song_queue_urls, queue_count
-
-        #Check if request is url (but not youtube url)... if it isn't then search for song on youtube and get url
-        song_url = ''
-        search_results = ''
-        if validators.url(song_request) and song_request.find('youtube') == -1:
-            song_url = song_request
-        else:
-            search_query = urllib.parse.urlencode({'search_query': song_request})
-            htm_content = urllib.request.urlopen(
-                'http://www.youtube.com/results?' + search_query
-            )
-            search_results = re.findall(r'/watch\?v=(.{11})', htm_content.read().decode())
-            song_url = 'http://www.youtube.com/watch?v=' + search_results[0]
-
-        #Download song
-        song_file_name = f'song{queue_count}.mp3'
-        ydl_opts = {
-            'format': 'bestaudio/best',
-            'outtmpl': song_file_name,
-            'postprocessors': [{
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
-                'preferredquality': '192',
-            }],
-        }
-        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-            ydl.download([song_url])
-
-        song_queue.append(song_file_name)
-        song_queue_urls.append(song_url)
-        queue_count += 1
-
-        print(f'Music: {song_request} was added to the queue\n')
-        print(f'Music: Queue -> {song_queue}\n')
-        await ctx.send(f'{song_request} was added to the queue\n')        
-
 
     @commands.command(
-        name='clearqueue',
-        description='Clears the song queue',
-        aliases=['emptyqueue']
+        name='createmusicchannel',
+        description='Creates a dedicated music channel',
+        aliases=['createmusic'],
     )
-    async def clear_queue(self,ctx):
-        global song_queue, song_queue_urls, queue_count
+    @commands.has_permissions(manage_channels=True)
+    async def create_music_channel(self,ctx):
+        music_channel = await ctx.guild.create_text_channel(
+            name='🎵-ciara-music',
+            topic='This is a channel for music',
+        )
 
-        voice = get(self.bot.voice_clients, guild = ctx.guild)
-        for file in os.listdir('./'):
-            if file.endswith('.mp3'):
-                if voice.is_playing() and file == 'current-song.mp3':
-                    print('Song is playing and will not be removed from queue\n')
-                else:
-                    os.remove(file)
-                    if len(song_queue) > 0:
-                        song_queue.pop(0)
-                        song_queue_urls.pop(0)
-                        queue_count -= 1
-
-        print('Music: queue cleared\n')
-        await ctx.send('The song queue was cleared')   
 
 
 def setup(bot):
