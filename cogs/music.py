@@ -3,6 +3,7 @@ import os, urllib.parse, urllib.request, re
 
 import discord
 from discord import channel
+from discord import embeds
 from discord.ext import commands
 from discord.utils import get
 import youtube_dl
@@ -10,32 +11,44 @@ import validators
 
 import config as ciara
 
-song_queue = []
-song_queue_urls = []
-queue_count = 0
 
 class Music(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+
+        self.song_queue = []
+        self.song_queue_urls = []
+        self.queue_count = 0
+
+        self.music_embed = discord.Embed(
+            title='Ciara Music',
+            color=0xFFFF00,
+        )
+        self.music_embed.set_image(url='https://media.istockphoto.com/vectors/yellow-lines-geometric-vector-logo-letter-c-vector-id1171091258?k=6&m=1171091258&s=612x612&w=0&h=VQ3FNuAsABNoNajTiYMrgc4ahbdUn7sz1zhr3VvkqY4=')
         
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        if message.author == self.bot.user:
-            return
-
-        if message.content.startswith(ciara.discord_secrets['prefix']):
-            return
-
         channel = message.channel
         server = message.guild
 
         for key in ciara.music_channels:
             if key == str(server.id):
                 if ciara.music_channels[key] == str(channel.id):
-                    ctx = await self.bot.get_context(message)
-                    await ctx.invoke(self.bot.get_command('play'), song_request=message.content)
+                    if len(message.embeds) > 0 and message.embeds[0].title == 'Ciara Music':
+                        return
+
+                    if message.author == self.bot.user:
+                        await message.delete(delay=2)
+
+                    elif message.content.startswith(ciara.discord_secrets['prefix']):
+                        await message.delete(delay=2)
+
+                    else:
+                        ctx = await self.bot.get_context(message)
+                        await ctx.invoke(self.bot.get_command('play'), song_request=message.content)
+                        await message.delete(delay=2)
 
 
     @commands.command(
@@ -44,7 +57,6 @@ class Music(commands.Cog):
         aliases=['p']
     )
     async def play(self,ctx,*,song_request : str = ''):
-        global song_queue, song_queue_urls, queue_count
 
         #Functions as resume command when no url is passed
         if song_request == '':
@@ -52,7 +64,8 @@ class Music(commands.Cog):
             return
 
         #delete play message
-        await ctx.invoke(self.bot.get_command('deletemessages'), number_messages = 0)
+        await ctx.message.delete()
+        await ctx.send(embed=self.music_embed)
 
         #Removes old song file if not in use
         song_file = os.path.isfile('current-song.mp3')
@@ -67,8 +80,8 @@ class Music(commands.Cog):
 
         #Checks queue after song finishes
         def check_queue(error):
-            if len(song_queue) > 0:
-                end_of_file_name = song_queue.pop(0)
+            if len(self.song_queue) > 0:
+                end_of_file_name = self.song_queue.pop(0)
                 os.remove('current-song.mp3')
                 print('Music: Removed old song file\n')
 
@@ -84,7 +97,7 @@ class Music(commands.Cog):
                     after= check_queue
                 )
 
-                coro = ctx.send('Began playing : ' + str(song_queue_urls.pop(0)))
+                coro = ctx.send('Began playing : ' + str(self.song_queue_urls.pop(0)))
                 fut = asyncio.run_coroutine_threadsafe(coro, self.bot.loop)
                 try:
                     fut.result()
@@ -92,7 +105,6 @@ class Music(commands.Cog):
                     pass
             else:
                 queue_count = 0
-
 
         
         #Check if request is url (but not youtube url)... if it isn't then search for song on youtube and get url
@@ -142,7 +154,6 @@ class Music(commands.Cog):
         hidden=True
     )
     async def queue(self,ctx,song_request):
-        global song_queue, song_queue_urls, queue_count
 
         #Check if request is url (but not youtube url)... if it isn't then search for song on youtube and get url
         song_url = ''
@@ -158,7 +169,7 @@ class Music(commands.Cog):
             song_url = 'http://www.youtube.com/watch?v=' + search_results[0]
 
         #Download song
-        song_file_name = f'song{queue_count}.mp3'
+        song_file_name = f'song{self.queue_count}.mp3'
         ydl_opts = {
             'format': 'bestaudio/best',
             'outtmpl': song_file_name,
@@ -171,12 +182,12 @@ class Music(commands.Cog):
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             ydl.download([song_url])
 
-        song_queue.append(song_file_name)
-        song_queue_urls.append(song_url)
-        queue_count += 1
+        self.song_queue.append(song_file_name)
+        self.song_queue_urls.append(song_url)
+        self.queue_count += 1
 
         print(f'Music: {song_request} was added to the queue\n')
-        print(f'Music: Queue -> {song_queue}\n')
+        print(f'Music: Queue -> {self.song_queue}\n')
         await ctx.send(f'{song_request} was added to the queue\n')        
 
 
@@ -186,7 +197,6 @@ class Music(commands.Cog):
         aliases=['emptyqueue']
     )
     async def clear_queue(self,ctx):
-        global song_queue, song_queue_urls, queue_count
 
         voice = get(self.bot.voice_clients, guild = ctx.guild)
         for file in os.listdir('./'):
@@ -195,10 +205,10 @@ class Music(commands.Cog):
                     print('Song is playing and will not be removed from queue\n')
                 else:
                     os.remove(file)
-                    if len(song_queue) > 0:
-                        song_queue.pop(0)
-                        song_queue_urls.pop(0)
-                        queue_count -= 1
+                    if len(self.song_queue) > 0:
+                        self.song_queue.pop(0)
+                        self.song_queue_urls.pop(0)
+                        self.queue_count -= 1
 
         print('Music: queue cleared\n')
         await ctx.send('The song queue was cleared')   
