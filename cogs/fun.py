@@ -123,5 +123,16 @@ class Fun(commands.Cog):
         print(f'Fun: A coin was flipped, result was {coin_flip}\n')
 
 
+    @commands.command(
+        name='choose',
+        description='''Randomly chooses an item from a given set of options separated by spaces
+
+        If you want to include an option that has spaces surround it in quotation marks
+        For example c choose \"option 1\" \"option 2\"''',
+    )
+    async def choose(self,ctx,*options):
+        await ctx.send(f'{random.choice(options)}')
+
+
 def setup(bot):
     bot.add_cog(Fun(bot))
