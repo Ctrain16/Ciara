@@ -1,4 +1,5 @@
 import asyncio
+from asyncio.windows_events import NULL
 import os, urllib.parse, urllib.request, re
 
 import discord
@@ -26,29 +27,61 @@ class Music(commands.Cog):
             color=0xFFFF00,
         )
         self.music_embed.set_image(url='https://media.istockphoto.com/vectors/yellow-lines-geometric-vector-logo-letter-c-vector-id1171091258?k=6&m=1171091258&s=612x612&w=0&h=VQ3FNuAsABNoNajTiYMrgc4ahbdUn7sz1zhr3VvkqY4=')
-        
+
+        self.music_message = discord.Message = NULL
+
+
+    def is_music_channel(channel : discord.channel, server : discord.guild):
+        for key in ciara.music_channels:
+            if key == str(server.id):
+                if ciara.music_channels[key] == str(channel.id):
+                    return True
+        return False
+
+
+    async def update_music_player(self, message : discord.Message):
+        edited_embed = discord.Embed(
+            title=message.embeds[0].title,
+            color=0xFFFF00,
+        )
+        edited_embed.set_author(name='Ciara Music Player')
+        edited_embed.set_image(url=message.embeds[0].thumbnail.url)
+        edited_embed.set_footer(text='This is the footer')
+
+        await self.music_message.edit(embed = edited_embed)
+
 
     @commands.Cog.listener()
     async def on_message(self, message):
         channel = message.channel
         server = message.guild
 
-        for key in ciara.music_channels:
-            if key == str(server.id):
-                if ciara.music_channels[key] == str(channel.id):
-                    if len(message.embeds) > 0 and message.embeds[0].title == 'Ciara Music':
-                        return
+        if Music.is_music_channel(channel, server):
+            print('MUSSSSSSSSSSSSSSSSSIIIIIIIIIIIIIIIICCCCCCCCCCCCCCCCCC') 
+            print(message.embeds)
+            if len(message.embeds) > 0:
+                print('TRUEEEEEEEEEEEEEEEEEEEEEEE')
 
-                    if message.author == self.bot.user:
-                        await message.delete(delay=2)
+            if len(message.embeds) > 0 and message.embeds[0].title == 'Ciara Music':
+                print(f'test: {message.embeds[0].title}')
+                return
 
-                    elif message.content.startswith(ciara.discord_secrets['prefix']):
-                        await message.delete(delay=2)
+            if len(message.embeds) > 0:
+                print(f'test: {message.embeds[0].title}')
+                if self.music_message.author.bot:
+                    await Music.update_music_player(self, message)
 
-                    else:
-                        ctx = await self.bot.get_context(message)
-                        await ctx.invoke(self.bot.get_command('play'), song_request=message.content)
-                        await message.delete(delay=2)
+
+            if message.author == self.bot.user:
+                await message.delete(delay=2)
+
+            elif message.content.startswith(ciara.discord_secrets['prefix']):
+                await message.delete(delay=2)
+
+            else:
+                ctx = await self.bot.get_context(message)
+                await ctx.invoke(self.bot.get_command('play'), song_request=message.content)
+                await message.delete(delay=2)
 
 
     @commands.command(
@@ -65,7 +98,10 @@ class Music(commands.Cog):
 
         #delete play message
         await ctx.message.delete()
-        await ctx.send(embed=self.music_embed)
+        
+        if self.music_message == NULL:
+            self.music_message = await ctx.send(embed=self.music_embed)
+            print(self.music_message)
 
         #Removes old song file if not in use
         song_file = os.path.isfile('current-song.mp3')
@@ -145,8 +181,10 @@ class Music(commands.Cog):
         )
         
         #Prints confirmation
+        update_message = await ctx.send(f'Began playing : {song_url}')
+        #if self.music_message != NULL:
+        #    await Music.update_music_player(self, update_message)
         print(f'Music: Ciara connected to {channel} and began playing: {song_url}\n')
-        await ctx.send(f'Began playing : {song_url}')
 
 
     @commands.command(

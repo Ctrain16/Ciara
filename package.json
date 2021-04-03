@@ -1,0 +1,24 @@
+{
+  "name": "ciara",
+  "version": "1.0.0",
+  "description": "Custom discord bot",
+  "main": "index.js",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "discord.js": "^12.5.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ctrain16/C.I.A.R.A..git"
+  },
+  "author": "@Ctrain16",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Ctrain16/C.I.A.R.A./issues"
+  },
+  "homepage": "https://github.com/Ctrain16/C.I.A.R.A.#readme"
+}
