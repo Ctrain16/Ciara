@@ -2,6 +2,7 @@
 config.py
 __init__.py
 node_modules
+.prettierrc
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
