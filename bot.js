@@ -10,16 +10,6 @@ const client = new Commando.Client({
   commandPrefix: 'c ',
 });
 
-client.on('ready', () => {
-  console.log('C.I.A.R.A. is online.');
-});
-
-client.on('message', (message) => {
-  if (message.content === 'ping') {
-    message.channel.send('pong');
-  }
-});
-
 client.registry
   .registerGroups([
     ['music', 'Music'],
@@ -29,14 +19,33 @@ client.registry
   .registerCommandsIn(path.join(__dirname, 'commands'));
 
 client.setProvider(
-  MongoClient.connect(
-    `mongodb+srv://${process.env.MONGO_CONNECTION}@ciaradb.zmwci.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`,
-    { useUnifiedTopology: true }
-  )
+  MongoClient.connect(process.env.MONGO_CONNECTION, {
+    useUnifiedTopology: true,
+  })
     .then((client) => new MongoDBProvider(client, 'ciaraDataBase'))
     .catch((err) => {
       console.error(err);
     })
 );
+
+client
+  .on('ready', () => {
+    console.log('C.I.A.R.A. is online.');
+    client.user.setActivity('My Creator', {
+      type: 'LISTENING',
+    });
+  })
+  .on('disconnect', () => {
+    console.log('Disconnected.');
+  })
+  .on('reconnecting', () => {
+    console.log('Reconnecting.');
+  });
+
+client.on('message', (message) => {
+  if (message.content === 'ping') {
+    message.channel.send('pong');
+  }
+});
 
 client.login(process.env.CIARA_TOKEN);
