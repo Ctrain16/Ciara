@@ -42,10 +42,4 @@ client
     console.log('Reconnecting.');
   });
 
-client.on('message', (message) => {
-  if (message.content === 'ping') {
-    message.channel.send('pong');
-  }
-});
-
 client.login(process.env.CIARA_TOKEN);
