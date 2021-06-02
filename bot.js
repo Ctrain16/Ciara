@@ -3,10 +3,11 @@ require('dotenv').config();
 const path = require('path');
 const { MongoClient } = require('mongodb');
 const { MongoDBProvider } = require('commando-provider-mongo');
-
 const Commando = require('discord.js-commando');
+const Discord = require('discord.js');
+
 const client = new Commando.Client({
-  owner: '327627829221261312',
+  owner: process.env.MY_DISCORD_ID,
   commandPrefix: 'c ',
 });
 
@@ -40,6 +41,22 @@ client
   })
   .on('reconnecting', () => {
     console.log('Reconnecting.');
+  })
+  .on('guildMemberAdd', (member) => {
+    const channel = member.guild.systemChannel;
+    const welcomeEmbed = new Discord.MessageEmbed({
+      title: `${client.user.username} welcomes you!`,
+      description: `Hey ${member}, welcome to **${channel.guild}**!\n\nTo find out all I can do type: \n\`${client.commandPrefix} help\`\n`,
+      thumbnail: {
+        url: member.user.displayAvatarURL(),
+      },
+      timestamp: new Date(),
+      footer: {
+        iconURL: client.user.displayAvatarURL(),
+        text: 'Ciara',
+      },
+    });
+    channel.send(welcomeEmbed);
   });
 
 client.login(process.env.CIARA_TOKEN);

@@ -31,7 +31,6 @@ module.exports = class PlayCommand extends Commando.Command {
       );
       return msg.reply(`Joined channel ${msg.member.voice.channel}`);
     } else {
-      return msg.reply('You must be in a voice channel to use this command.');
     }
   }
 };
