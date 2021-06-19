@@ -21,8 +21,12 @@ module.exports = class CalculatorCommand extends Commando.Command {
   }
 
   run(msg, { role }) {
-    this.client.provider.set(msg.guild.id, 'defaultRole', role);
-    console.log(this.client.provider.settings);
-    return msg.reply(`${role} will now be given to new members.`);
+    const roleExists = msg.guild.roles.cache.find((r) => r.toString() === role);
+    if (roleExists) {
+      this.client.provider.set(msg.guild.id, 'defaultRole', role);
+      return msg.reply(`${role} will now be given to new members.`);
+    } else {
+      return msg.reply(`Please specify a role that exists.`);
+    }
   }
 };
