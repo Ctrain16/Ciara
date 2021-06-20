@@ -36,12 +36,6 @@ client
       type: 'LISTENING',
     });
   })
-  .on('disconnect', () => {
-    console.log('Disconnected.');
-  })
-  .on('reconnecting', () => {
-    console.log('Reconnecting.');
-  })
   .on('guildMemberAdd', (member) => {
     const channel = member.guild.systemChannel;
     const welcomeEmbed = new Discord.MessageEmbed({
