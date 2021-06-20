@@ -1,7 +1,5 @@
 const Commando = require('discord.js-commando');
 const ytdl = require('ytdl-core');
-const fs = require('fs');
-const fetch = require('node-fetch');
 const youtubeSearch = require('youtube-search');
 
 module.exports = class PlayCommand extends Commando.Command {
@@ -12,13 +10,13 @@ module.exports = class PlayCommand extends Commando.Command {
       group: 'music',
       memberName: 'play',
       description: 'Plays a song',
-      examples: ['play song-name/link'],
 
       args: [
         {
           key: 'song',
           prompt: 'What song would you like to play',
           type: 'string',
+          default: '',
         },
       ],
     });
@@ -41,6 +39,21 @@ module.exports = class PlayCommand extends Commando.Command {
       return msg.reply(
         `${this.client.user.username} is already bound to \` ${activeGuildConnection.channel.name} \``
       );
+
+    if (
+      activeGuildConnection &&
+      activeGuildConnection.channel === msg.member.voice.channel &&
+      activeGuildConnection.dispatcher.paused
+    ) {
+      activeGuildConnection.dispatcher.resume();
+      msg.channel.send(`**Resumed**  ⏯`);
+      return;
+    }
+
+    if (!song) {
+      msg.reply('You need to specify a song to play.');
+      return;
+    }
 
     const [connection, error] = activeGuildConnection
       ? [activeGuildConnection, undefined]
