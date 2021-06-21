@@ -21,10 +21,10 @@ module.exports = class PlayCommand extends Commando.Command {
       msg.guild.id
     );
 
-    if (
-      activeGuildConnection &&
-      activeGuildConnection.channel !== msg.member.voice.channel
-    )
+    if (!activeGuildConnection)
+      return msg.reply(`There is currently no song playing`);
+
+    if (activeGuildConnection.channel !== msg.member.voice.channel)
       return msg.reply(
         `You must be in \` ${activeGuildConnection.channel.name} \` to use this command.`
       );
