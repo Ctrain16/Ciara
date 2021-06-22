@@ -43,7 +43,8 @@ module.exports = class PlayCommand extends Commando.Command {
     if (
       activeGuildConnection &&
       activeGuildConnection.channel === msg.member.voice.channel &&
-      activeGuildConnection.dispatcher.paused
+      activeGuildConnection?.dispatcher?.paused &&
+      !song
     ) {
       activeGuildConnection.dispatcher.resume();
       msg.channel.send(`**Resumed**  ⏯`);
@@ -55,6 +56,9 @@ module.exports = class PlayCommand extends Commando.Command {
       return;
     }
 
+    const [songLink, songInfo] = await this.calcSongInformation(song, msg);
+    if (!songLink) return msg.channel.send(`Failed to find \` ${song} \``);
+
     const [connection, error] = activeGuildConnection
       ? [activeGuildConnection, undefined]
       : await this.joinVoiceChannel(msg);
@@ -64,12 +68,17 @@ module.exports = class PlayCommand extends Commando.Command {
         `There was an error joining \` ${msg.member.voice.channel.name} \``
       );
 
-    const [songLink, songInfo] = await this.calcSongInformation(song, msg);
-    const dispatcher = connection.play(
-      ytdl(songLink, { quality: 'highestaudio', filter: 'audioonly' })
-    );
+    if (connection.dispatcher) {
+      const [songLink, songInfo] = await this.calcSongInformation(song, msg);
+      connection.queue
+        ? connection.queue.push({ songLink, songInfo })
+        : (connection.queue = [{ songLink, songInfo }]);
 
-    return msg.channel.send(`**Playing >>>** \` ${songInfo.title} \`  🎵`);
+      this.printQueue(connection, msg);
+      return;
+    }
+
+    this.playSong(connection, songLink, songInfo, msg);
   }
 
   async joinVoiceChannel(msg) {
@@ -83,12 +92,43 @@ module.exports = class PlayCommand extends Commando.Command {
     return [connection, error];
   }
 
+  playSong(connection, songLink, songInfo, msg) {
+    const dispatcher = connection.play(
+      ytdl(songLink, { quality: 'highestaudio', filter: 'audioonly' })
+    );
+    msg.channel.send(`**Playing >>>** \` ${songInfo.title} \`  🎵`);
+
+    if (connection.queue?.length > 0) this.printQueue(connection, msg);
+
+    dispatcher.on('finish', () => {
+      if (!connection.queue || connection.queue.length === 0) {
+        connection.disconnect();
+        msg.channel.send(
+          `**Disconnected** from \` ${connection.channel.name} \``
+        );
+        return;
+      }
+      const song = connection.queue.shift();
+      this.playSong(connection, song.songLink, song.songInfo, msg);
+    });
+  }
+
+  printQueue(connection, msg) {
+    const songQueueString = connection.queue
+      .map((song, i) => `${i + 1}. ${song.songInfo.title}`)
+      .join('\n');
+    msg.channel.send(`**Queue:** \`\`\`${songQueueString}\`\`\``);
+  }
+
   async calcSongInformation(song, msg) {
     if (this.validURL(song)) {
       await this.sleep(500);
-      return [song, msg.embeds[0]];
+      return msg.embeds.length > 0
+        ? [song, msg.embeds[0]]
+        : [song, { title: song }];
     } else {
       const songInfo = await this.searchYoutube(song);
+      if (!songInfo) return [undefined, undefined];
       return [songInfo.link, songInfo];
     }
   }
