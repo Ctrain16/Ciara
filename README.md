@@ -6,7 +6,13 @@
 
 Cal's Intelligent And Responsive Automaton is my custom discord bot that is built using Node.js (previously Python).
 
-There is no specific theme to the bot and there will be a variety of commands and functionality... more on this will be added later as the project continues.
+## Functionality
+
+Ciara's functionality will expand over time. Currently she supports the following:
+
+- Music
+- Welcome messages
+- Giving new users a role
 
 ## Discord.js
 
