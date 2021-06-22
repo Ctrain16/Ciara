@@ -98,13 +98,11 @@ module.exports = class PlayCommand extends Commando.Command {
     );
     msg.channel.send(`**Playing >>>** \` ${songInfo.title} \`  🎵`);
 
-    if (connection.queue?.length > 0) this.printQueue(connection, msg);
-
     dispatcher.on('finish', () => {
       if (!connection.queue || connection.queue.length === 0) {
         connection.disconnect();
         msg.channel.send(
-          `**Disconnected** from \` ${connection.channel.name} \``
+          `**Disconnected** from \` ${connection.channel.name} \`  👋`
         );
         return;
       }
