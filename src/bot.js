@@ -29,6 +29,8 @@ client.setProvider(
 client
   .on('ready', () => events.online(client))
   .on('guildMemberAdd', (member) => events.welcomeMember(member, client))
-  .on('message', (msg) => {});
+  .on('message', async (msg) => {
+    await events.messageSent(msg, client);
+  });
 
 client.login(process.env.CIARA_TOKEN);

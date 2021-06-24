@@ -1,4 +1,5 @@
 const Discord = require('discord.js');
+const { MongoClient } = require('mongodb');
 
 exports.online = function (client) {
   console.log('C.I.A.R.A. is online.');
@@ -36,5 +37,64 @@ exports.welcomeMember = function (member, client) {
         )
       )
       .catch((err) => console.error(err));
+  }
+};
+
+exports.messageSent = async function (msg, client) {
+  if (msg.author.id === client.user.id) return;
+  const authorId = msg.author.id;
+  const guildId = msg.guild.id;
+
+  const mongoClient = new MongoClient(process.env.MONGO_CONNECTION, {
+    useUnifiedTopology: true,
+  });
+  await mongoClient.connect();
+  const serverLevelsCollection = mongoClient
+    .db('ciaraDataBase')
+    .collection('serverlevels');
+
+  const filter = {
+    authorId,
+    guildId,
+  };
+
+  const userLevelDoc = await serverLevelsCollection.findOne(filter);
+  if (userLevelDoc && (new Date() - userLevelDoc.lastupdate) / 1000 > 30) {
+    // One message logged every 30 seconds to prevent spam
+    const updateQuery = { totalMessages: 1 };
+
+    if (
+      [10, 25, 50].includes(userLevelDoc.totalMessages + 1) ||
+      userLevelDoc.totalMessages % 100 === 0
+    ) {
+      updateQuery.level = 1;
+      await msg.reply(
+        `Congratulations! You've sent **${
+          userLevelDoc.totalMessages + 1
+        }** messages in ${
+          msg.guild.name
+        } and as a result have been **promoted to level ${
+          userLevelDoc.level + 1
+        }.**`
+      );
+    }
+
+    await serverLevelsCollection.updateOne(filter, {
+      $inc: updateQuery,
+      $set: {
+        lastupdate: new Date(),
+      },
+    });
+  } else if (!userLevelDoc) {
+    console.log(
+      `'${msg.author.username}' sent their first message in '${msg.guild.name}'`
+    );
+    await serverLevelsCollection.insertOne({
+      guildId,
+      authorId,
+      lastupdate: new Date(),
+      totalMessages: 1,
+      level: 0,
+    });
   }
 };
