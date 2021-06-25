@@ -19,7 +19,8 @@
     "nodemon": "^2.0.7"
   },
   "scripts": {
-    "devStart": "nodemon src/bot.js"
+    "devStart": "nodemon src/bot.js",
+    "start": "node src/bot.js"	
   },
   "repository": {
     "type": "git",
