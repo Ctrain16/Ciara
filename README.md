@@ -18,4 +18,4 @@ Ciara's functionality will expand over time. Currently she supports the followin
 
 Discord.js is a Discord API wrapper I utilized.
 
-The documentation can be found here: https://discord.js.org/#/
+The documentation can be found [here](https://discord.js.org/#/).
