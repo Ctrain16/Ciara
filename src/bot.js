@@ -1,5 +1,4 @@
-'use strict';
-require('dotenv').config();
+if (!process.env.NODE_ENV) require('dotenv').config();
 const path = require('path');
 const { MongoClient } = require('mongodb');
 const { MongoDBProvider } = require('commando-provider-mongo');
@@ -20,7 +19,15 @@ client.setProvider(
   MongoClient.connect(process.env.MONGO_CONNECTION, {
     useUnifiedTopology: true,
   })
-    .then((client) => new MongoDBProvider(client, 'ciaraDataBase'))
+    .then(
+      (client) =>
+        new MongoDBProvider(
+          client,
+          process.env.NODE_ENV === 'development'
+            ? 'ciaraDevDb'
+            : 'ciaraDataBase'
+        )
+    )
     .catch((err) => {
       console.error(err);
     })
@@ -33,4 +40,6 @@ client
     await events.messageSent(msg, client);
   });
 
-client.login(process.env.CIARA_TOKEN);
+process.env.NODE_ENV === 'development'
+  ? client.login(process.env.CIARA_DEV_TOKEN)
+  : client.login(process.env.CIARA_TOKEN);
