@@ -50,7 +50,7 @@ exports.messageSent = async function (msg, client) {
   });
   await mongoClient.connect();
   const serverLevelsCollection = mongoClient
-    .db('ciaraDataBase')
+    .db(process.env.NODE_ENV === 'development' ? 'ciaraDevDb' : 'ciaraDataBase')
     .collection('serverlevels');
 
   const filter = {
