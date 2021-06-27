@@ -10,17 +10,17 @@
     "discord.js-commando": "^0.12.3",
     "dotenv": "^8.2.0",
     "ffmpeg-static": "^4.4.0",
-    "mathjs": "^9.3.0",
+    "mathjs": "^9.4.3",
     "mongodb": "^3.6.5",
     "youtube-search": "^1.1.6",
-    "ytdl-core": "^4.8.2"
+    "ytdl-core": "^4.8.3"
   },
   "devDependencies": {
     "nodemon": "^2.0.7"
   },
   "scripts": {
     "devStart": "nodemon src/bot.js",
-    "start": "node src/bot.js"	
+    "start": "node src/bot.js"
   },
   "repository": {
     "type": "git",
