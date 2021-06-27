@@ -41,7 +41,6 @@ exports.welcomeMember = function (member, client) {
 };
 
 exports.messageSent = async function (msg, client) {
-  if (msg.author.id === client.user.id) return;
   const authorId = msg.author.id;
   const guildId = msg.guild.id;
 

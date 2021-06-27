@@ -37,6 +37,8 @@ client
   .on('ready', () => events.online(client))
   .on('guildMemberAdd', (member) => events.welcomeMember(member, client))
   .on('message', async (msg) => {
+    if (msg.author.id === client.user.id) return;
+    if (msg.isCommand) return;
     await events.messageSent(msg, client);
   });
 
