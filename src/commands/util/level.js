@@ -28,6 +28,8 @@ module.exports = class CalculatorCommand extends Commando.Command {
       guildId: msg.guild.id,
     });
 
+    await mongoClient.close();
+
     return msg.reply(
       !userLevelDoc
         ? `Congrats on your first message here! You're **Level: 0**`

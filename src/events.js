@@ -96,4 +96,6 @@ exports.messageSent = async function (msg, client) {
       level: 0,
     });
   }
+
+  await mongoClient.close();
 };
