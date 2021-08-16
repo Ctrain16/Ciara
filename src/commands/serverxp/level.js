@@ -6,9 +6,9 @@ module.exports = class CalculatorCommand extends Commando.Command {
   constructor(client) {
     super(client, {
       name: 'level',
-      group: 'util',
+      group: 'serverxp',
       memberName: 'level',
-      description: 'Checks your server level.',
+      description: 'Displays your server level, rank, and total messages sent.',
     });
   }
 

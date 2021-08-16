@@ -11,7 +11,10 @@ const client = new Commando.Client({
 });
 
 client.registry
-  .registerGroups([['music', 'Music']])
+  .registerGroups([
+    ['music', 'Music'],
+    ['serverxp', 'Server XP'],
+  ])
   .registerDefaults()
   .registerCommandsIn(path.join(__dirname, 'commands'));
 
