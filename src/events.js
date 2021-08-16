@@ -64,7 +64,7 @@ exports.messageSent = async function (msg, client) {
 
     if (
       [10, 25, 50].includes(userLevelDoc.totalMessages + 1) ||
-      userLevelDoc.totalMessages % 100 === 0
+      (userLevelDoc.totalMessages + 1) % 100 === 0
     ) {
       updateQuery.level = 1;
       await msg.reply(
