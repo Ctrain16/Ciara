@@ -33,32 +33,30 @@ module.exports = class CalculatorCommand extends Commando.Command {
     if (!serverLevelsCollection)
       throw new Error('Failed to find database and/or collection');
 
-    const guildLevelRankings = await serverLevelsCollection
-      .find({
-        guildId: msg.guild.id,
-      })
-      .sort((a, b) => a.totalMessages - b.totalMessages)
-      .toArray();
+    const guildLevelRankings = (
+      await serverLevelsCollection
+        .find({
+          guildId: msg.guild.id,
+        })
+        .toArray()
+    ).sort((a, b) => b.totalMessages - a.totalMessages);
     await mongoClient.close();
 
-    const rankingMessage = await guildLevelRankings.reduce(
-      async (message, userMongoDoc, i) => {
-        try {
-          const user = await this.client.users.fetch(userMongoDoc.authorId);
-          const member = await msg.guild.members.fetch({ user, force: true });
+    let rankingMessage = '';
+    for (let i = 0; i < Math.min(10, guildLevelRankings.length); i++) {
+      const userMongoDoc = guildLevelRankings[i];
+      let username = 'Former Member';
+      try {
+        const user = await this.client.users.fetch(userMongoDoc.authorId);
+        username = await msg.guild.members.fetch({ user, force: true });
+      } catch (error) {
+        console.error(error);
+      }
 
-          return (
-            (await message) +
-            `${i + 1}. ${member} - ${
-              userMongoDoc.totalMessages
-            } ${calcRankEmote(i + 1)}\n\n`
-          );
-        } catch (error) {
-          return await message;
-        }
-      },
-      Promise.resolve('')
-    );
+      rankingMessage += `${i + 1}. ${username} - ${
+        userMongoDoc.totalMessages
+      } ${calcRankEmote(i + 1)}\n\n`;
+    }
 
     const levelEmbed = new Discord.MessageEmbed({
       title: `🏆 ${msg.guild}'s Activity Leaderboard 🏆`,
