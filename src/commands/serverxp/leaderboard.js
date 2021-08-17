@@ -44,13 +44,13 @@ module.exports = class CalculatorCommand extends Commando.Command {
     const rankingMessage = await guildLevelRankings.reduce(
       async (message, userMongoDoc, i) => {
         const user = await this.client.users.fetch(userMongoDoc.authorId);
-        const member = await msg.guild.members.fetch({ user, force: true });
+        // const member = await msg.guild.members.fetch({ user, force: true });
 
         return (
           (await message) +
-          `${i + 1}. ${member} - ${userMongoDoc.totalMessages} ${calcRankEmote(
-            i + 1
-          )}\n\n`
+          `${i + 1}. ${user.username} - ${
+            userMongoDoc.totalMessages
+          } ${calcRankEmote(i + 1)}\n\n`
         );
       },
       Promise.resolve('')
