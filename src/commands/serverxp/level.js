@@ -33,12 +33,13 @@ module.exports = class CalculatorCommand extends Commando.Command {
     if (!serverLevelsCollection)
       throw new Error('Failed to find database and/or collection');
 
-    const guildLevelRankings = await serverLevelsCollection
-      .find({
-        guildId: msg.guild.id,
-      })
-      .sort((a, b) => a.totalMessages - b.totalMessages)
-      .toArray();
+    const guildLevelRankings = (
+      await serverLevelsCollection
+        .find({
+          guildId: msg.guild.id,
+        })
+        .toArray()
+    ).sort((a, b) => b.totalMessages - a.totalMessages);
     await mongoClient.close();
 
     let userRank =
