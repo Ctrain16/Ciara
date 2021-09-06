@@ -1,6 +1,2 @@
-*.mp3
 config.py
 __init__.py
-node_modules
-.prettierrc
-.env
