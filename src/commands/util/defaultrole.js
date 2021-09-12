@@ -21,6 +21,10 @@ module.exports = class CalculatorCommand extends Commando.Command {
   }
 
   run(msg, { role }) {
+    const userPermissions = msg.member.permissions;
+    if (!userPermissions.has('ADMINISTRATOR'))
+      return msg.reply(`You don't have permission to use this command.`);
+
     const roleExists = msg.guild.roles.cache.find((r) => r.toString() === role);
     if (roleExists) {
       this.client.provider.set(msg.guild.id, 'defaultRole', role);
