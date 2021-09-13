@@ -1,5 +1,6 @@
 const Discord = require('discord.js');
 const { MongoClient } = require('mongodb');
+const { convertArrayToMap } = require('./util/map');
 
 exports.online = function (client) {
   console.log('C.I.A.R.A. is online.');
@@ -67,6 +68,13 @@ exports.messageSent = async function (msg, client) {
       (userLevelDoc.totalMessages + 1) % 100 === 0
     ) {
       updateQuery.level = 1;
+
+      const roleAwardedMessage = await awardRole(
+        client,
+        msg,
+        userLevelDoc.level + 1
+      );
+
       await msg.reply(
         `Congratulations! You've sent **${
           userLevelDoc.totalMessages + 1
@@ -74,7 +82,7 @@ exports.messageSent = async function (msg, client) {
           msg.guild.name
         } and as a result have been **promoted to level ${
           userLevelDoc.level + 1
-        }.**`
+        }.** ${roleAwardedMessage}`
       );
     }
 
@@ -98,4 +106,24 @@ exports.messageSent = async function (msg, client) {
   }
 
   await mongoClient.close();
+};
+
+const awardRole = async function (client, msg, newLevel) {
+  const member = msg.member;
+  let levelRoles = client.provider.get(msg.guild.id, 'levelRoles');
+  if (!levelRoles) return '';
+
+  levelRoles = convertArrayToMap(levelRoles);
+
+  if (!levelRoles.has(newLevel)) return '';
+
+  const role = member.guild.roles.cache.find(
+    (r) => r.toString() === levelRoles.get(newLevel)
+  );
+
+  await member.roles.add(role);
+
+  return `With this level increase you've been awarded the role of ${levelRoles.get(
+    newLevel
+  )}`;
 };
