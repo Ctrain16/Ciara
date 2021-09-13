@@ -5,7 +5,7 @@ module.exports = class CalculatorCommand extends Commando.Command {
   constructor(client) {
     super(client, {
       name: 'levelroleremove',
-      aliases: ['removeLR'],
+      aliases: ['removelr'],
       group: 'serverxp',
       memberName: 'levelroleremove',
       description: 'Removes a levelrole.',
