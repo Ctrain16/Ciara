@@ -45,6 +45,11 @@ exports.messageSent = async function (msg, client) {
   const authorId = msg.author.id;
   const guildId = msg.guild.id;
 
+  const guildSettings = client.provider.settings.get(guildId);
+  if (!guildSettings.levelsEnabled) {
+    return;
+  }
+
   const mongoClient = new MongoClient(process.env.MONGO_CONNECTION, {
     useUnifiedTopology: true,
   });
