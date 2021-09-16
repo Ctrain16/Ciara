@@ -36,10 +36,13 @@ module.exports = class CreateConfigChannelCommand extends Commando.Command {
     if (!userPermissions.has('ADMINISTRATOR'))
       return msg.reply(`You don't have permission to use this command.`);
 
-    const guildSettings = this.client.provider.settings.get(msg.guild.id);
+    const guildSettings = await this.client.provider.settings.get(msg.guild.id);
     const configChannelId = guildSettings.configChannelId;
 
-    if (!configChannelId) this.createChannel(msg);
+    if (!configChannelId) {
+      await this.createChannel(msg);
+      return;
+    }
 
     const configChannel = msg.guild.channels.cache.find(
       (channel) => channel.id === configChannelId
@@ -47,6 +50,6 @@ module.exports = class CreateConfigChannelCommand extends Commando.Command {
 
     if (configChannel) return msg.reply(`${configChannel} already exists.`);
 
-    this.createChannel(msg);
+    await this.createChannel(msg);
   }
 };
