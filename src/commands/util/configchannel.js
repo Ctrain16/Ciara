@@ -1,6 +1,4 @@
 const Commando = require('discord.js-commando');
-const { json } = require('mathjs');
-
 module.exports = class CreateConfigChannelCommand extends Commando.Command {
   constructor(client) {
     super(client, {
