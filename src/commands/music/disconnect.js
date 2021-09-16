@@ -1,6 +1,6 @@
 const Commando = require('discord.js-commando');
 
-module.exports = class PlayCommand extends Commando.Command {
+module.exports = class DisconnectCommand extends Commando.Command {
   constructor(client) {
     super(client, {
       name: 'disconnect',

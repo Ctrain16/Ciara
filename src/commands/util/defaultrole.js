@@ -1,6 +1,6 @@
 const Commando = require('discord.js-commando');
 
-module.exports = class CalculatorCommand extends Commando.Command {
+module.exports = class DefaultRoleCommand extends Commando.Command {
   constructor(client) {
     super(client, {
       name: 'setrole',

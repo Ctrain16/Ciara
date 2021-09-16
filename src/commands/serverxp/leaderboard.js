@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const Commando = require('discord.js-commando');
 const { MongoClient } = require('mongodb');
 
-module.exports = class CalculatorCommand extends Commando.Command {
+module.exports = class LeaderboardCommand extends Commando.Command {
   constructor(client) {
     super(client, {
       name: 'leaderboard',

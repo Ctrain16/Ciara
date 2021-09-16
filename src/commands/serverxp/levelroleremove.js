@@ -1,7 +1,7 @@
 const Commando = require('discord.js-commando');
 const { convertMapToArray, convertArrayToMap } = require('../../util/map');
 
-module.exports = class CalculatorCommand extends Commando.Command {
+module.exports = class LevelRoleRemoveCommand extends Commando.Command {
   constructor(client) {
     super(client, {
       name: 'levelroleremove',
