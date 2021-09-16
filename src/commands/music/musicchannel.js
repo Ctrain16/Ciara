@@ -1,4 +1,5 @@
 const Commando = require('discord.js-commando');
+const Discord = require('discord.js');
 
 module.exports = class CreateMusicChannelCommand extends Commando.Command {
   constructor(client) {
@@ -23,6 +24,18 @@ module.exports = class CreateMusicChannelCommand extends Commando.Command {
       'musicChannelId',
       musicChannel.id
     );
+
+    const musicEmbed = new Discord.MessageEmbed({
+      title: 'No song currently playing.',
+      image: {
+        url: this.client.user.displayAvatarURL({ dynamic: true, size: 512 }),
+      },
+    });
+
+    const sentEmbed = await musicChannel.send(musicEmbed);
+    await sentEmbed.react('▶');
+    await sentEmbed.react('⏸');
+    await sentEmbed.react('⏭');
     return msg.reply(`${musicChannel} was created.`);
   }
 
