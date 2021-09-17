@@ -40,9 +40,19 @@ client
   .on('ready', () => events.online(client))
   .on('guildMemberAdd', (member) => events.welcomeMember(member, client))
   .on('message', async (msg) => {
-    if (msg.author.id === client.user.id) return;
     if (msg.author.bot) return;
+
+    const musicChannel = client.provider.get(msg.guild.id, 'musicChannelId');
+    if (musicChannel && musicChannel === msg.channel.id) {
+      msg.delete();
+      client.registry.commands
+        .get('play')
+        .run(msg, { song: msg.content, isMusicChannel: true });
+
+      return;
+    }
     if (msg.isCommand) return;
+
     await events.messageSent(msg, client);
   });
 

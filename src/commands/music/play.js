@@ -22,11 +22,14 @@ module.exports = class PlayCommand extends Commando.Command {
     });
   }
 
-  async run(msg, { song }) {
-    if (!msg.member.voice.channel)
-      return msg.reply(
-        `You need to be in a voice channel in order to use this command!`
-      );
+  async run(msg, { song, isMusicChannel = false }) {
+    if (!msg.member.voice.channel) {
+      if (!isMusicChannel)
+        return msg.reply(
+          `You need to be in a voice channel in order to use this command!`
+        );
+      return;
+    }
 
     const activeGuildConnection = this.client.voice.connections.get(
       msg.guild.id
@@ -35,10 +38,13 @@ module.exports = class PlayCommand extends Commando.Command {
     if (
       activeGuildConnection &&
       activeGuildConnection.channel !== msg.member.voice.channel
-    )
-      return msg.reply(
-        `${this.client.user.username} is already bound to \` ${activeGuildConnection.channel.name} \``
-      );
+    ) {
+      if (!isMusicChannel)
+        return msg.reply(
+          `${this.client.user.username} is already bound to \` ${activeGuildConnection.channel.name} \``
+        );
+      return;
+    }
 
     if (
       activeGuildConnection &&
@@ -47,23 +53,24 @@ module.exports = class PlayCommand extends Commando.Command {
       !song
     ) {
       activeGuildConnection.dispatcher.resume();
-      msg.channel.send(`**Resumed**  ⏯`);
+      if (!isMusicChannel) msg.channel.send(`**Resumed**  ⏯`);
       return;
     }
 
     if (!song) {
-      msg.reply('You need to specify a song to play.');
+      if (!isMusicChannel) msg.reply('You need to specify a song to play.');
       return;
     }
 
     const [songLink, songInfo] = await this.calcSongInformation(song, msg);
-    if (!songLink) return msg.channel.send(`Failed to find \` ${song} \``);
+    if (!songLink && !isMusicChannel)
+      return msg.channel.send(`Failed to find \` ${song} \``);
 
     const [connection, error] = activeGuildConnection
       ? [activeGuildConnection, undefined]
-      : await this.joinVoiceChannel(msg);
+      : await this.joinVoiceChannel(msg, isMusicChannel);
 
-    if (error)
+    if (error && !isMusicChannel)
       return msg.channel.send(
         `There was an error joining \` ${msg.member.voice.channel.name} \``
       );
@@ -74,48 +81,57 @@ module.exports = class PlayCommand extends Commando.Command {
         ? connection.queue.push({ songLink, songInfo })
         : (connection.queue = [{ songLink, songInfo }]);
 
-      this.printQueue(connection, msg);
+      this.printQueue(connection, msg, isMusicChannel);
       return;
     }
 
-    this.playSong(connection, songLink, songInfo, msg);
+    this.playSong(connection, songLink, songInfo, msg, isMusicChannel);
   }
 
-  async joinVoiceChannel(msg) {
+  async joinVoiceChannel(msg, isMusicChannel) {
     const [connection, error] = await this.tryCatchForAsync(
       msg.member.voice.channel.join()
     );
-    if (connection)
+    if (connection && !isMusicChannel)
       msg.channel.send(
         `**Joined >>>** \` ${msg.member.voice.channel.name} \`  👋`
       );
     return [connection, error];
   }
 
-  playSong(connection, songLink, songInfo, msg) {
+  playSong(connection, songLink, songInfo, msg, isMusicChannel) {
     const dispatcher = connection.play(
       ytdl(songLink, { quality: 'highestaudio', filter: 'audioonly' })
     );
-    msg.channel.send(`**Playing >>>** \` ${songInfo.title} \`  🎵`);
+    if (!isMusicChannel)
+      msg.channel.send(`**Playing >>>** \` ${songInfo.title} \`  🎵`);
 
     dispatcher.on('finish', () => {
       if (!connection.queue || connection.queue.length === 0) {
         connection.disconnect();
-        msg.channel.send(
-          `**Disconnected** from \` ${connection.channel.name} \`  👋`
-        );
+        if (!isMusicChannel)
+          msg.channel.send(
+            `**Disconnected** from \` ${connection.channel.name} \`  👋`
+          );
         return;
       }
       const song = connection.queue.shift();
-      this.playSong(connection, song.songLink, song.songInfo, msg);
+      this.playSong(
+        connection,
+        song.songLink,
+        song.songInfo,
+        msg,
+        isMusicChannel
+      );
     });
   }
 
-  printQueue(connection, msg) {
+  printQueue(connection, msg, isMusicChannel) {
     const songQueueString = connection.queue
       .map((song, i) => `${i + 1}. ${song.songInfo.title}`)
       .join('\n');
-    msg.channel.send(`**Queue:** \`\`\`${songQueueString}\`\`\``);
+    if (!isMusicChannel)
+      msg.channel.send(`**Queue:** \`\`\`${songQueueString}\`\`\``);
   }
 
   async calcSongInformation(song, msg) {
