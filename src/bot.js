@@ -36,6 +36,11 @@ client.setProvider(
     })
 );
 
+client.dispatcher.addInhibitor((msg) => {
+  const musicChannel = client.provider.get(msg.guild.id, 'musicChannelId');
+  if (msg.channel.id === musicChannel) return 'block';
+});
+
 client
   .on('ready', () => events.online(client))
   .on('guildMemberAdd', (member) => events.welcomeMember(member, client))
