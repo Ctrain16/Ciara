@@ -1,6 +1,7 @@
 const Commando = require('discord.js-commando');
 const ytdl = require('ytdl-core');
 const youtubeSearch = require('youtube-search');
+const Discord = require('discord.js');
 
 module.exports = class PlayCommand extends Commando.Command {
   constructor(client) {
@@ -99,20 +100,54 @@ module.exports = class PlayCommand extends Commando.Command {
     return [connection, error];
   }
 
-  playSong(connection, songLink, songInfo, msg, isMusicChannel) {
+  async playSong(connection, songLink, songInfo, msg, isMusicChannel) {
     const dispatcher = connection.play(
       ytdl(songLink, { quality: 'highestaudio', filter: 'audioonly' })
     );
     if (!isMusicChannel)
       msg.channel.send(`**Playing >>>** \` ${songInfo.title} \`  🎵`);
+    else {
+      const embedId = this.client.provider.get(msg.guild.id, 'musicMessageId');
+      const embedMessage = await msg.channel.messages.fetch(embedId);
 
-    dispatcher.on('finish', () => {
+      const musicEmbed = new Discord.MessageEmbed({
+        title: songInfo.title,
+        image: songInfo.thumbnails.high,
+        description:
+          connection.queue && connection.queue.length > 0
+            ? `**Queue:** \`\`\`${connection.queue
+                .map((song, i) => `${i + 1}. ${song.songInfo.title}`)
+                .join('\n')}\`\`\``
+            : null,
+      });
+
+      embedMessage.edit(musicEmbed);
+    }
+
+    dispatcher.on('finish', async () => {
       if (!connection.queue || connection.queue.length === 0) {
         connection.disconnect();
         if (!isMusicChannel)
           msg.channel.send(
             `**Disconnected** from \` ${connection.channel.name} \`  👋`
           );
+        else {
+          const embedId = this.client.provider.get(
+            msg.guild.id,
+            'musicMessageId'
+          );
+          const embedMessage = await msg.channel.messages.fetch(embedId);
+          const musicEmbed = new Discord.MessageEmbed({
+            title: 'No song currently playing.',
+            image: {
+              url: 'https://github.com/Ctrain16/Ciara/blob/main/images/CiaraLogo-480x360.jpg?raw=true',
+              width: 480,
+              height: 360,
+            },
+          });
+
+          embedMessage.edit(musicEmbed);
+        }
         return;
       }
       const song = connection.queue.shift();
@@ -126,12 +161,22 @@ module.exports = class PlayCommand extends Commando.Command {
     });
   }
 
-  printQueue(connection, msg, isMusicChannel) {
+  async printQueue(connection, msg, isMusicChannel) {
     const songQueueString = connection.queue
       .map((song, i) => `${i + 1}. ${song.songInfo.title}`)
       .join('\n');
     if (!isMusicChannel)
       msg.channel.send(`**Queue:** \`\`\`${songQueueString}\`\`\``);
+    else {
+      const embedId = this.client.provider.get(msg.guild.id, 'musicMessageId');
+      const embedMessage = await msg.channel.messages.fetch(embedId);
+
+      const musicEmbed = new Discord.MessageEmbed(
+        embedMessage.embeds[0]
+      ).setDescription(`**Queue:** \`\`\`${songQueueString}\`\`\``);
+
+      embedMessage.edit(musicEmbed);
+    }
   }
 
   async calcSongInformation(song, msg) {

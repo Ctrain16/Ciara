@@ -28,7 +28,9 @@ module.exports = class CreateMusicChannelCommand extends Commando.Command {
     const musicEmbed = new Discord.MessageEmbed({
       title: 'No song currently playing.',
       image: {
-        url: this.client.user.displayAvatarURL({ dynamic: true, size: 512 }),
+        url: 'https://github.com/Ctrain16/Ciara/blob/main/images/CiaraLogo-480x360.jpg?raw=true',
+        width: 480,
+        height: 360,
       },
     });
 
@@ -36,6 +38,13 @@ module.exports = class CreateMusicChannelCommand extends Commando.Command {
     await sentEmbed.react('▶');
     await sentEmbed.react('⏸');
     await sentEmbed.react('⏭');
+
+    await this.client.provider.set(
+      msg.guild.id,
+      'musicMessageId',
+      sentEmbed.id
+    );
+
     return msg.reply(`${musicChannel} was created.`);
   }
 
