@@ -16,7 +16,7 @@ module.exports = class CreateMusicChannelCommand extends Commando.Command {
   async createChannel(msg) {
     const musicChannel = await msg.guild.channels.create('🎶-ciara-dj', {
       type: 'GUILD_TEXT',
-      topic: 'Instructions for dj channel',
+      topic: `:arrow_forward: = Resume a song :pause_button: = Pause song :track_next: = Skip a song`,
     });
 
     await this.client.provider.set(
