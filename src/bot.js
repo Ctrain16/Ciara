@@ -8,6 +8,7 @@ const events = require('./events');
 const client = new Commando.Client({
   owner: process.env.MY_DISCORD_ID,
   commandPrefix: 'c ',
+  partials: ['MESSAGE', 'CHANNEL', 'REACTION'],
 });
 
 client.registry
@@ -59,6 +60,38 @@ client
     if (msg.isCommand) return;
 
     await events.messageSent(msg, client);
+  })
+  .on('messageReactionAdd', async (reaction, user) => {
+    try {
+      if (user === client.user) return;
+      if (reaction.partial) await reaction.fetch();
+
+      const embedId = client.provider.get(
+        reaction.message.guild.id,
+        'musicMessageId'
+      );
+
+      if (reaction.message.id !== embedId) return;
+
+      if (reaction.emoji.name === '▶') {
+        client.registry.commands
+          .get('play')
+          .run(reaction.message, { song: null, isMusicChannel: true });
+      } else if (reaction.emoji.name === '⏸') {
+        client.registry.commands
+          .get('pause')
+          .run(reaction.message, { isMusicChannel: true });
+      } else if (reaction.emoji.name === '⏭') {
+        client.registry.commands
+          .get('skip')
+          .run(reaction.message, { isMusicChannel: true });
+      }
+
+      await reaction.users.remove(user);
+    } catch (error) {
+      console.error(`[ERROR]: ${error}`);
+      return;
+    }
   });
 
 process.env.NODE_ENV === 'development'
