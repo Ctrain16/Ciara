@@ -11,25 +11,33 @@ module.exports = class SkipCommand extends Commando.Command {
     });
   }
 
-  async run(msg) {
-    if (!msg.member.voice.channel)
-      return msg.reply(
-        `You need to be in a voice channel in order to use this command!`
-      );
+  async run(msg, { isMusicChannel = false }) {
+    if (!msg.member.voice.channel) {
+      if (!isMusicChannel)
+        msg.reply(
+          `You need to be in a voice channel in order to use this command!`
+        );
+      return;
+    }
 
     const activeGuildConnection = this.client.voice.connections.get(
       msg.guild.id
     );
 
-    if (!activeGuildConnection)
-      return msg.reply(`There is currently no song playing`);
+    if (!activeGuildConnection) {
+      if (!isMusicChannel) msg.reply(`There is currently no song playing`);
+      return;
+    }
 
-    if (activeGuildConnection.channel !== msg.member.voice.channel)
-      return msg.reply(
-        `You must be in \` ${activeGuildConnection.channel.name} \` to use this command.`
-      );
+    if (activeGuildConnection.channel !== msg.member.voice.channel) {
+      if (!isMusicChannel)
+        msg.reply(
+          `You must be in \` ${activeGuildConnection.channel.name} \` to use this command.`
+        );
+      return;
+    }
 
-    msg.channel.send(`**Skipped**  ⏭`);
+    if (!isMusicChannel) msg.channel.send(`**Skipped**  ⏭`);
     activeGuildConnection.dispatcher.emit('finish');
   }
 };
