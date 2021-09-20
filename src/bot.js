@@ -85,7 +85,7 @@ client
         client.registry.commands
           .get('skip')
           .run(reaction.message, { isMusicChannel: true });
-      } else if (reaction.emjoi.name === '⏹') {
+      } else if (reaction.emoji.name === '⏹') {
         client.registry.commands
           .get('disconnect')
           .run(reaction.message, { isMusicChannel: true });
