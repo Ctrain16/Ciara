@@ -4,7 +4,6 @@ module.exports = class PauseCommand extends Commando.Command {
   constructor(client) {
     super(client, {
       name: 'pause',
-      aliases: ['stop'],
       group: 'music',
       memberName: 'pause',
       description: 'Pauses the current song',

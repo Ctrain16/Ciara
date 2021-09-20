@@ -16,7 +16,7 @@ module.exports = class CreateMusicChannelCommand extends Commando.Command {
   async createChannel(msg) {
     const musicChannel = await msg.guild.channels.create('🎶-ciara-dj', {
       type: 'GUILD_TEXT',
-      topic: `:arrow_forward: = Resume a song :pause_button: = Pause song :track_next: = Skip a song`,
+      topic: `:arrow_forward: = Resume a song :pause_button: = Pause song :track_next: = Skip a song :stop_button: = Stops song and clears queue`,
     });
 
     await this.client.provider.set(
@@ -38,6 +38,7 @@ module.exports = class CreateMusicChannelCommand extends Commando.Command {
     await sentEmbed.react('▶');
     await sentEmbed.react('⏸');
     await sentEmbed.react('⏭');
+    await sentEmbed.react('⏹');
 
     await this.client.provider.set(
       msg.guild.id,

@@ -85,6 +85,10 @@ client
         client.registry.commands
           .get('skip')
           .run(reaction.message, { isMusicChannel: true });
+      } else if (reaction.emjoi.name === '⏹') {
+        client.registry.commands
+          .get('disconnect')
+          .run(reaction.message, { isMusicChannel: true });
       }
 
       await reaction.users.remove(user);
