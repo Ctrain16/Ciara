@@ -3,7 +3,12 @@ const path = require('path');
 const { MongoClient } = require('mongodb');
 const { MongoDBProvider } = require('commando-provider-mongo');
 const Commando = require('discord.js-commando');
-const { online, messageSent, welcomeMember } = require('./events');
+const {
+  online,
+  messageSent,
+  welcomeMember,
+  messageReaction,
+} = require('./util/events');
 
 const client = new Commando.Client({
   owner: process.env.MY_DISCORD_ID,
@@ -47,6 +52,7 @@ client
   .on('guildMemberAdd', (member) => welcomeMember(member, client))
   .on('message', async (msg) => {
     if (msg.author.bot) return;
+    if (msg.isCommand) return;
 
     const musicChannel = client.provider.get(msg.guild.id, 'musicChannelId');
     if (musicChannel && musicChannel === msg.channel.id) {
@@ -57,45 +63,11 @@ client
 
       return;
     }
-    if (msg.isCommand) return;
 
     await messageSent(msg, client);
   })
   .on('messageReactionAdd', async (reaction, user) => {
-    try {
-      if (user === client.user) return;
-      if (reaction.partial) await reaction.fetch();
-
-      const embedId = client.provider.get(
-        reaction.message.guild.id,
-        'musicMessageId'
-      );
-
-      if (reaction.message.id !== embedId) return;
-
-      if (reaction.emoji.name === '▶') {
-        client.registry.commands
-          .get('play')
-          .run(reaction.message, { song: null, isMusicChannel: true });
-      } else if (reaction.emoji.name === '⏸') {
-        client.registry.commands
-          .get('pause')
-          .run(reaction.message, { isMusicChannel: true });
-      } else if (reaction.emoji.name === '⏭') {
-        client.registry.commands
-          .get('skip')
-          .run(reaction.message, { isMusicChannel: true });
-      } else if (reaction.emoji.name === '⏹') {
-        client.registry.commands
-          .get('disconnect')
-          .run(reaction.message, { isMusicChannel: true });
-      }
-
-      await reaction.users.remove(user);
-    } catch (error) {
-      console.error(`[ERROR]: ${error}`);
-      return;
-    }
+    messageReaction(reaction, user, client);
   });
 
 process.env.NODE_ENV === 'development'
