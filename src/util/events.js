@@ -92,7 +92,7 @@ const messageToCiara = async function (msg, client) {
       url: 'https://text-sentiment.p.rapidapi.com/analyze',
       headers: {
         'x-rapidapi-host': 'text-sentiment.p.rapidapi.com',
-        'x-rapidapi-key': '5e91f4cd91msh9b9eaef6a66066bp105ef1jsnfa047bed5952',
+        'x-rapidapi-key': process.env.TEXT_ANALYSIS_KEY,
       },
       data: {
         text: msg.content,
