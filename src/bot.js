@@ -70,7 +70,14 @@ client
       msg.content.split(' ').includes(`<@!${client.user.id}>`) ||
       msg.content.toLowerCase().includes('ciara')
     ) {
-      // mute user
+      client.registry.commands
+        .get('textmute')
+        .run(msg, {
+          user: msg.member,
+          timeUnit: 'm',
+          numTime: '15',
+          automute: true,
+        });
     }
   })
   .on('messageReactionAdd', async (reaction, user) => {

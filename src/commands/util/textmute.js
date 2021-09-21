@@ -57,10 +57,13 @@ module.exports = class TextMuteCommand extends Commando.Command {
       return;
     }
 
-    // 1. Create role if doesn't exist
     const muteRoleId = this.client.provider.get(msg.guild.id, 'textmuteRoleId');
     let muteRole = null;
-    if (!muteRoleId) {
+    if (muteRoleId) {
+      muteRole = msg.guild.roles.cache.find((r) => r.id === muteRoleId);
+    }
+
+    if (!muteRole) {
       muteRole = await msg.guild.roles.create({
         data: {
           name: 'ciaraMuted',
@@ -72,34 +75,35 @@ module.exports = class TextMuteCommand extends Commando.Command {
         'textmuteRoleId',
         muteRole.id
       );
-    } else {
-      muteRole = msg.guild.roles.cache.find((r) => r.id === muteRoleId);
     }
 
-    // 2. Update all text channels as potentially more were added
     msg.guild.channels.cache.forEach((channel) => {
       channel.updateOverwrite(muteRole, {
+        CREATE_PUBLIC_THREADS: false,
+        CREATE_PRIVATE_THREADS: false,
+        SEND_MESSAGES_IN_THREADS: false,
         SEND_MESSAGES: false,
       });
     });
 
-    // 3. check if user is admin (can't mute them)
     const userToMute = automute
       ? user
       : msg.guild.members.cache.find(
           (member) => `<@!${member.user.id}>` === user
         );
     if (userToMute.permissions.has('ADMINISTRATOR')) {
-      if (!automute)
-        msg.reply(`This person cannot be muted as they are an admin.`);
+      if (!automute) msg.reply(`${user} cannot be muted as they are an admin.`);
       return;
     }
 
-    // 4. Mute user
+    if (userToMute.roles.cache.find((role) => role.id === muteRole.id)) {
+      if (!automute) msg.reply(`${user} is already text muted.`);
+      return;
+    }
     userToMute.roles.add(muteRole);
 
-    // 5. Set time to unmute
     setTimeout(() => {
+      msg.channel.send(`${user} you have been unmuted... watch yourself.`);
       userToMute.roles.remove(muteRole);
     }, timeToMute);
 
