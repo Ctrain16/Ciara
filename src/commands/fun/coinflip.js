@@ -5,7 +5,7 @@ module.exports = class CoinFlipCommand extends Commando.Command {
     super(client, {
       name: 'coinflip',
       aliases: ['cf', 'flip'],
-      group: 'util',
+      group: 'fun',
       memberName: 'coinflip',
       description: 'Flips a coin.',
     });

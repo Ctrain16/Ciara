@@ -21,6 +21,7 @@ client.registry
   .registerGroups([
     ['music', 'Music'],
     ['serverxp', 'Server XP'],
+    ['fun', 'Fun'],
   ])
   .registerDefaults()
   .registerCommandsIn(path.join(__dirname, 'commands'));
