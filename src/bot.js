@@ -65,6 +65,13 @@ client
     }
 
     await messageSent(msg, client);
+
+    if (
+      msg.content.split(' ').includes(`<@!${client.user.id}>`) ||
+      msg.content.toLowerCase().includes('ciara')
+    ) {
+      // mute user
+    }
   })
   .on('messageReactionAdd', async (reaction, user) => {
     messageReaction(reaction, user, client);
