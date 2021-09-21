@@ -8,6 +8,7 @@ const {
   messageSent,
   welcomeMember,
   messageReaction,
+  messageToCiara,
 } = require('./util/events');
 
 const client = new Commando.Client({
@@ -69,16 +70,8 @@ client
     if (
       msg.content.split(' ').includes(`<@!${client.user.id}>`) ||
       msg.content.toLowerCase().includes('ciara')
-    ) {
-      client.registry.commands
-        .get('textmute')
-        .run(msg, {
-          user: msg.member,
-          timeUnit: 'm',
-          numTime: '15',
-          automute: true,
-        });
-    }
+    )
+      await messageToCiara(msg, client);
   })
   .on('messageReactionAdd', async (reaction, user) => {
     messageReaction(reaction, user, client);

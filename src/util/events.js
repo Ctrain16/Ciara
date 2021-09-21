@@ -1,4 +1,5 @@
 const Discord = require('discord.js');
+const axios = require('axios').default;
 const { updateUserLevel } = require('./levels');
 
 const online = function (client) {
@@ -84,9 +85,39 @@ const messageReaction = async function (reaction, user, client) {
   }
 };
 
+const messageToCiara = async function (msg, client) {
+  try {
+    const res = await axios.request({
+      method: 'POST',
+      url: 'https://text-sentiment.p.rapidapi.com/analyze',
+      headers: {
+        'x-rapidapi-host': 'text-sentiment.p.rapidapi.com',
+        'x-rapidapi-key': '5e91f4cd91msh9b9eaef6a66066bp105ef1jsnfa047bed5952',
+      },
+      data: {
+        text: msg.content,
+      },
+    });
+
+    if (res.data.neg || res.data.mid) {
+      client.registry.commands.get('textmute').run(msg, {
+        user: msg.member,
+        timeUnit: 'm',
+        numTime: '15',
+        automute: true,
+      });
+    } else if (res.data.pos) {
+      msg.react('♥');
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 module.exports = {
   online,
   messageSent,
   welcomeMember,
   messageReaction,
+  messageToCiara,
 };
