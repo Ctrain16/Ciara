@@ -42,13 +42,15 @@ exports.welcomeMember = function (member, client) {
 };
 
 exports.messageSent = async function (msg, client) {
+  const guildSettings = client.provider.settings.get(msg.guild.id);
+  if (guildSettings.levelsEnabled) {
+    await updateUserLevel(msg, client);
+  }
+};
+
+const updateUserLevel = async function (msg, client) {
   const authorId = msg.author.id;
   const guildId = msg.guild.id;
-
-  const guildSettings = client.provider.settings.get(guildId);
-  if (!guildSettings.levelsEnabled) {
-    return;
-  }
 
   const mongoClient = new MongoClient(process.env.MONGO_CONNECTION, {
     useUnifiedTopology: true,
@@ -73,7 +75,16 @@ exports.messageSent = async function (msg, client) {
       (userLevelDoc.totalMessages + 1) % 100 === 0
     ) {
       updateQuery.level = 1;
+    }
 
+    await serverLevelsCollection.updateOne(filter, {
+      $inc: updateQuery,
+      $set: {
+        lastupdate: new Date(),
+      },
+    });
+
+    if (updateQuery.level) {
       const roleAwardedMessage = await awardRole(
         client,
         msg,
@@ -90,13 +101,6 @@ exports.messageSent = async function (msg, client) {
         }.** ${roleAwardedMessage}`
       );
     }
-
-    await serverLevelsCollection.updateOne(filter, {
-      $inc: updateQuery,
-      $set: {
-        lastupdate: new Date(),
-      },
-    });
   } else if (!userLevelDoc) {
     console.log(
       `'${msg.author.username}' sent their first message in '${msg.guild.name}'`
