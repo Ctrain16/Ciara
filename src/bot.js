@@ -3,7 +3,7 @@ const path = require('path');
 const { MongoClient } = require('mongodb');
 const { MongoDBProvider } = require('commando-provider-mongo');
 const Commando = require('discord.js-commando');
-const events = require('./events');
+const { online, messageSent, welcomeMember } = require('./events');
 
 const client = new Commando.Client({
   owner: process.env.MY_DISCORD_ID,
@@ -43,8 +43,8 @@ client.dispatcher.addInhibitor((msg) => {
 });
 
 client
-  .on('ready', () => events.online(client))
-  .on('guildMemberAdd', (member) => events.welcomeMember(member, client))
+  .on('ready', () => online(client))
+  .on('guildMemberAdd', (member) => welcomeMember(member, client))
   .on('message', async (msg) => {
     if (msg.author.bot) return;
 
@@ -59,7 +59,7 @@ client
     }
     if (msg.isCommand) return;
 
-    await events.messageSent(msg, client);
+    await messageSent(msg, client);
   })
   .on('messageReactionAdd', async (reaction, user) => {
     try {

@@ -2,14 +2,14 @@ const Discord = require('discord.js');
 const { MongoClient } = require('mongodb');
 const { convertArrayToMap } = require('./util/map');
 
-exports.online = function (client) {
+const online = function (client) {
   console.log('C.I.A.R.A. is online.');
   client.user.setActivity('My Creator', {
     type: 'LISTENING',
   });
 };
 
-exports.welcomeMember = function (member, client) {
+const welcomeMember = function (member, client) {
   const channel = member.guild.systemChannel;
   const welcomeEmbed = new Discord.MessageEmbed({
     title: `${client.user.username} welcomes you!`,
@@ -41,7 +41,7 @@ exports.welcomeMember = function (member, client) {
   }
 };
 
-exports.messageSent = async function (msg, client) {
+const messageSent = async function (msg, client) {
   const guildSettings = client.provider.settings.get(msg.guild.id);
   if (guildSettings.levelsEnabled) {
     await updateUserLevel(msg, client);
@@ -135,4 +135,10 @@ const awardRole = async function (client, msg, newLevel) {
   return `With this level increase you've been awarded the role of ${levelRoles.get(
     newLevel
   )}`;
+};
+
+module.exports = {
+  online,
+  messageSent,
+  welcomeMember,
 };
