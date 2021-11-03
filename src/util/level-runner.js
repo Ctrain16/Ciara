@@ -54,8 +54,16 @@ const _updateUserLevel = async function (mongoClient, msg, client) {
     return;
   }
 
-  // TODO switch level system to be based of 100's so I can easily do 1.25 and 1.5 for nitro and server boosters
-  const updateValue = 100; // TODO detemrine if this needs to be deferent based on above critierai
+  const isServerBooster = client.guilds.cache
+    .get(guildId)
+    .members.cache.get(authorId)
+    .roles.cache.find((r) => {
+      return r.name === 'Server Booster';
+    })
+    ? true
+    : false;
+
+  const updateValue = isServerBooster ? 125 : 100;
   const updateQuery = { totalMessages: updateValue };
   const newMessageCount = Math.floor(
     (userLevelDoc.totalMessages + updateValue) / 100
@@ -90,26 +98,57 @@ const _updateUserLevel = async function (mongoClient, msg, client) {
   }
 };
 
-const runJobs = async function () {
+const runJobs = async function (client) {
   // 1. connect to db
-  const mongoClient = new MongoClient(process.env.MONGO_CONNECTION, {
-    useUnifiedTopology: true,
-  });
-  await mongoClient.connect();
+  try {
+    const mongoClient = new MongoClient(process.env.MONGO_CONNECTION, {
+      useUnifiedTopology: true,
+    });
+    await mongoClient.connect();
 
-  // 2. get all items in queue with unique user id
+    // 2. get all items in queue with unique user id
+    const levelQueueCollectionItems = await mongoClient
+      .db(
+        process.env.NODE_ENV === 'development' ? 'ciaraDevDb' : 'ciaraDataBase'
+      )
+      .collection('levelQueue')
+      .find()
+      .toArray();
 
-  // 3. update each item
+    // 3. update each item
+    for (const item of levelQueueCollectionItems) {
+      try {
+        const message = await client.channels.cache
+          .get(item.channelId)
+          .messages.fetch(item.msgId);
+        await _updateUserLevel(mongoClient, message, client);
+        await mongoClient
+          .db(
+            process.env.NODE_ENV === 'development'
+              ? 'ciaraDevDb'
+              : 'ciaraDataBase'
+          )
+          .collection('levelQueue')
+          .deleteOne({ _id: item._id });
+      } catch (error) {
+        console.error('LEVEL RUNNER ERROR', error);
+        continue;
+      }
+    }
 
-  // 4. handle errors
-
-  // 5. disconnect from db
-  await mongoClient.close();
+    // 4. disconnect from db
+    await mongoClient.close();
+  } catch (error) {
+    console.error(
+      'LEVEL RUNNER ERROR: Failed to connect to mongo in level runner',
+      error
+    );
+  }
 };
 
-const initLevelRunner = async function () {
+const initLevelRunner = async function (client) {
   console.log('Level Queue Runner Initialized');
-  setInterval(runJobs, POLL_INTERVAL);
+  setInterval(runJobs, POLL_INTERVAL, client);
 };
 
 module.exports = {

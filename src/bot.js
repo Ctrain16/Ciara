@@ -10,6 +10,7 @@ const {
   messageReaction,
   messageToCiara,
 } = require('./util/events');
+const { initLevelRunner } = require('./util/level-runner');
 
 const client = new Commando.Client({
   owner: process.env.MY_DISCORD_ID,
@@ -81,3 +82,5 @@ client
 process.env.NODE_ENV === 'development'
   ? client.login(process.env.CIARA_DEV_TOKEN)
   : client.login(process.env.CIARA_TOKEN);
+
+initLevelRunner(client);

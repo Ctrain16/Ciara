@@ -1,6 +1,26 @@
 const { MongoClient } = require('mongodb');
 const { convertArrayToMap } = require('./map');
 
+const addUserToLevelQueue = async function (msg, client) {
+  const mongoClient = new MongoClient(process.env.MONGO_CONNECTION, {
+    useUnifiedTopology: true,
+  });
+  await mongoClient.connect();
+
+  const levelQueueCollection = mongoClient
+    .db(process.env.NODE_ENV === 'development' ? 'ciaraDevDb' : 'ciaraDataBase')
+    .collection('levelQueue');
+
+  await levelQueueCollection.insertOne({
+    guildId: msg.guild.id,
+    authorId: msg.author.id,
+    timeAdded: new Date(),
+    msgId: msg.id,
+    channelId: msg.channel.id,
+  });
+  await mongoClient.close();
+};
+
 const updateUserLevel = async function (msg, client) {
   const authorId = msg.author.id;
   const guildId = msg.guild.id;
@@ -92,4 +112,5 @@ const awardRole = async function (client, msg, newLevel) {
 
 module.exports = {
   updateUserLevel,
+  addUserToLevelQueue,
 };
