@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const axios = require('axios').default;
-const { updateUserLevel, addUserToLevelQueue } = require('./levels');
+const { addUserToLevelQueue } = require('./levels');
 
 const online = function (client) {
   console.log('C.I.A.R.A. is online.');
@@ -44,8 +44,7 @@ const welcomeMember = function (member, client) {
 const messageSent = async function (msg, client) {
   const guildSettings = client.provider.settings.get(msg.guild.id);
   if (guildSettings.levelsEnabled) {
-    // await updateUserLevel(msg, client);
-    await addUserToLevelQueue(msg, client);
+    await addUserToLevelQueue(msg);
   }
 };
 
