@@ -58,7 +58,9 @@ module.exports = class LevelCommand extends Commando.Command {
         \`\`\`Rank:      ${userRank}  ${rankEmoji}\nLevel:     ${
         userLevelDoc?.level ? userLevelDoc.level : 0
       }  💯\nMessages:  ${
-        userLevelDoc?.totalMessages ? userLevelDoc.totalMessages : 0
+        userLevelDoc?.totalMessages
+          ? Math.floor(userLevelDoc.totalMessages / 100)
+          : 0
       }  💬\`\`\`
       `,
       thumbnail: {

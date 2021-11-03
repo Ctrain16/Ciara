@@ -50,12 +50,12 @@ module.exports = class LeaderboardCommand extends Commando.Command {
         const user = await this.client.users.fetch(userMongoDoc.authorId);
         username = await msg.guild.members.fetch({ user, force: true });
       } catch (error) {
-        console.error(error);
+        console.error('LEADERBOARD.js: ', error);
       }
 
-      rankingMessage += `${i + 1}. ${username} - ${
-        userMongoDoc.totalMessages
-      } ${calcRankEmote(i + 1)}\n\n`;
+      rankingMessage += `${i + 1}. ${username} - ${Math.floor(
+        userMongoDoc.totalMessages / 100
+      )} ${calcRankEmote(i + 1)}\n\n`;
     }
 
     const levelEmbed = new Discord.MessageEmbed({
