@@ -87,9 +87,9 @@ const _updateUserLevel = async function (mongoClient, msg, client) {
     );
 
     await msg.reply(
-      `Congratulations! You've sent **${
-        userLevelDoc.totalMessages + 1
-      }** messages in ${
+      `Congratulations! You've sent **${Math.floor(
+        (userLevelDoc.totalMessages + updateValue) / 100
+      )}** messages in ${
         msg.guild.name
       } and as a result have been **promoted to level ${
         userLevelDoc.level + 1
