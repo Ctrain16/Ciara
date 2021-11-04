@@ -143,6 +143,7 @@ const runJobs = async function (client) {
       'LEVEL RUNNER ERROR: Failed to connect to mongo in level runner',
       error
     );
+    await mongoClient.close();
   }
 };
 
