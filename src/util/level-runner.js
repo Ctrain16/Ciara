@@ -100,8 +100,9 @@ const _updateUserLevel = async function (mongoClient, msg, client) {
 
 const runJobs = async function (client) {
   // 1. connect to db
+  let mongoClient = null;
   try {
-    const mongoClient = new MongoClient(process.env.MONGO_CONNECTION, {
+    mongoClient = new MongoClient(process.env.MONGO_CONNECTION, {
       useUnifiedTopology: true,
     });
     await mongoClient.connect();
