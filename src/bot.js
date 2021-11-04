@@ -11,6 +11,7 @@ const {
   messageToCiara,
 } = require('./util/events');
 const { initLevelRunner } = require('./util/level-runner');
+const { initMuteRunner } = require('./util/mute-runner');
 
 const client = new Commando.Client({
   owner: process.env.MY_DISCORD_ID,
@@ -84,3 +85,4 @@ process.env.NODE_ENV === 'development'
   : client.login(process.env.CIARA_TOKEN);
 
 initLevelRunner(client);
+initMuteRunner(client);

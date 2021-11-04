@@ -28,7 +28,12 @@ const addUserToLevelQueue = async function (msg) {
   }
 };
 
-const addUserToMuteQueue = async function (msg, unmuteTime, muteType) {
+const addUserToMuteQueue = async function (
+  msg,
+  userToMute,
+  unmuteTime,
+  muteType
+) {
   let mongoClient = null;
   try {
     mongoClient = new MongoClient(process.env.MONGO_CONNECTION, {
@@ -44,7 +49,7 @@ const addUserToMuteQueue = async function (msg, unmuteTime, muteType) {
 
     await muteQueueCollection.insertOne({
       guildId: msg.guild.id,
-      authorId: msg.author.id,
+      userId: userToMute.id,
       unmuteAt: unmuteTime,
       msgId: msg.id,
       channelId: msg.channel.id,

@@ -103,7 +103,7 @@ module.exports = class TextMuteCommand extends Commando.Command {
     }
     userToMute.roles.add(muteRole);
 
-    await addUserToMuteQueue(msg, unmuteAt, 'text');
+    await addUserToMuteQueue(msg, userToMute, unmuteAt, 'text');
 
     return automute
       ? msg.channel.send(`${user} you say something?`)
