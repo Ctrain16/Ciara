@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const axios = require('axios').default;
-const { addUserToLevelQueue } = require('./levels');
+const { addUserToLevelQueue } = require('./queues');
 
 const online = function (client) {
   console.log('C.I.A.R.A. is online.');

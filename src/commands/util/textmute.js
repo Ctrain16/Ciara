@@ -1,4 +1,5 @@
 const Commando = require('discord.js-commando');
+const { addUserToMuteQueue } = require('../../util/queues');
 
 module.exports = class TextMuteCommand extends Commando.Command {
   constructor(client) {
@@ -44,13 +45,13 @@ module.exports = class TextMuteCommand extends Commando.Command {
       return;
     }
 
-    let timeToMute = null;
+    let unmuteAt = null;
     if (timeUnit === 'm') {
-      timeToMute = numTime * 60000;
+      unmuteAt = Date.now() + numTime * 60000;
     } else if (timeUnit === 'h') {
-      timeToMute = numTime * 60000 * 60;
+      unmuteAt = Date.now() + numTime * 60000 * 60;
     } else if (timeUnit === 'd') {
-      timeToMute = numTime * 60000 * 60 * 24;
+      unmuteAt = Date.now() + numTime * 60000 * 60 * 24;
     } else {
       if (!automute)
         msg.reply('Invalid time unit. Accepted units include d/h/m.');
@@ -102,10 +103,7 @@ module.exports = class TextMuteCommand extends Commando.Command {
     }
     userToMute.roles.add(muteRole);
 
-    setTimeout(() => {
-      msg.channel.send(`${user} you have been unmuted... watch yourself.`);
-      userToMute.roles.remove(muteRole);
-    }, timeToMute);
+    await addUserToMuteQueue(msg, unmuteAt, 'text');
 
     return automute
       ? msg.channel.send(`${user} you say something?`)
