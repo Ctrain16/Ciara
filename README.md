@@ -17,7 +17,7 @@ Ciara's functionality will expand over time. Currently she supports the followin
 
 ## Hosting
 
-Currently I have the bot hosted locally on a raspberry pi.
+I originally hosted the bot on my own raspberry pi but have since moved it over to an AWS EC2 server.
 
 ## Discord.js
 
