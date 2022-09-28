@@ -63,7 +63,11 @@ const _updateUserLevel = async function (mongoClient, msg, client) {
     ? true
     : false;
 
-  const updateValue = isServerBooster ? 125 : 100;
+  let updateValue = 100;
+  if (isServerBooster || client.isOwner(msg.author)) {
+    updateValue = 125;
+  }
+
   const updateQuery = { totalMessages: updateValue };
   const newMessageCount = Math.floor(
     (userLevelDoc.totalMessages + updateValue) / 100

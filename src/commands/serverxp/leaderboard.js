@@ -46,6 +46,7 @@ module.exports = class LeaderboardCommand extends Commando.Command {
       ).sort((a, b) => b.totalMessages - a.totalMessages);
       await mongoClient.close();
 
+      let ownerMessage = '';
       let rankingMessage = '';
       for (let i = 0; i < Math.min(10, guildLevelRankings.length); i++) {
         const userMongoDoc = guildLevelRankings[i];
@@ -53,6 +54,9 @@ module.exports = class LeaderboardCommand extends Commando.Command {
         try {
           const user = await this.client.users.fetch(userMongoDoc.authorId);
           username = await msg.guild.members.fetch({ user, force: true });
+          if (this.client.isOwner(user)) {
+            ownerMessage = `0. ${username} - ♾\n\n`;
+          }
         } catch (error) {
           console.error('LEADERBOARD.js: ', error);
         }
@@ -64,7 +68,7 @@ module.exports = class LeaderboardCommand extends Commando.Command {
 
       const levelEmbed = new Discord.MessageEmbed({
         title: `🏆 ${msg.guild}'s Activity Leaderboard 🏆`,
-        description: `${rankingMessage}`,
+        description: `${ownerMessage}${rankingMessage}`,
         timestamp: new Date(),
         footer: {
           iconURL: this.client.user.displayAvatarURL(),
