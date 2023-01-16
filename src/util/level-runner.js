@@ -2,6 +2,10 @@ const { MongoClient } = require('mongodb');
 const { convertArrayToMap } = require('./map');
 
 const POLL_INTERVAL = 1000;
+const TIME_BETWEEN_LEVEL_INCREASE_IN_SECONDS = 30;
+const FARMER_REGEX = /([Ff]+[Aa]+[Rr]+[Mm]+)\w*/;
+const BASE_MESSAGE_VALUE = 100;
+const BOOSTED_MESSAGE_VALUE = 125;
 
 const _awardRoleToUser = async function (client, msg, newLevel) {
   const member = msg.member;
@@ -36,24 +40,6 @@ const _updateUserLevel = async function (mongoClient, msg, client) {
     guildId,
   };
 
-  const userLevelDoc = await serverLevelsCollection.findOne(filter);
-  if (userLevelDoc && (new Date() - userLevelDoc.lastupdate) / 1000 < 30) {
-    // One message logged every 30 seconds to prevent spam
-    return;
-  } else if (!userLevelDoc) {
-    console.log(
-      `'${msg.author.username}' sent their first message in '${msg.guild.name}'`
-    );
-    await serverLevelsCollection.insertOne({
-      guildId,
-      authorId,
-      lastupdate: new Date(),
-      totalMessages: 1,
-      level: 0,
-    });
-    return;
-  }
-
   const isServerBooster = client.guilds.cache
     .get(guildId)
     .members.cache.get(authorId)
@@ -63,16 +49,43 @@ const _updateUserLevel = async function (mongoClient, msg, client) {
     ? true
     : false;
 
-  let updateValue = 100;
+  let updateValue = BASE_MESSAGE_VALUE;
   if (isServerBooster || client.isOwner(msg.author)) {
-    updateValue = 125;
+    updateValue = BOOSTED_MESSAGE_VALUE;
+  }
+
+  const userLevelDoc = await serverLevelsCollection.findOne(filter);
+  if (!userLevelDoc) {
+    console.log(
+      `'${msg.author.username}' sent their first message in '${msg.guild.name}'`
+    );
+    await serverLevelsCollection.insertOne({
+      guildId,
+      authorId,
+      lastupdate: new Date(),
+      totalMessages: updateValue,
+      level: 0,
+    });
+    return;
+  } else if (_isFarmMessage(msg)) {
+    updateValue = -updateValue;
+    await msg.reply(
+      `👩‍🌾 Quit farming ${msg.channel} you noob 👨‍🌾 ... also you lost a point for this.`
+    );
+  } else if (_isSpamMessage(userLevelDoc)) {
+    return; // don't aware points for spam messages
   }
 
   const updateQuery = { totalMessages: updateValue };
   const newMessageCount = Math.floor(
-    (userLevelDoc.totalMessages + updateValue) / 100
+    (userLevelDoc.totalMessages + updateValue) / BASE_MESSAGE_VALUE
   );
-  if ([10, 25, 50].includes(newMessageCount) || newMessageCount % 100 === 0) {
+
+  if (
+    ([10, 25, 50].includes(newMessageCount) ||
+      newMessageCount % BASE_MESSAGE_VALUE === 0) &&
+    _isValidLevelUp(userLevelDoc.level, updateValue, newMessageCount)
+  ) {
     updateQuery.level = 1;
   }
 
@@ -100,6 +113,37 @@ const _updateUserLevel = async function (mongoClient, msg, client) {
       }.** ${roleAwardedMessage}`
     );
   }
+};
+
+const _isSpamMessage = function (userLevelDoc) {
+  return (
+    userLevelDoc &&
+    (new Date() - userLevelDoc.lastupdate) / 1000 <
+      TIME_BETWEEN_LEVEL_INCREASE_IN_SECONDS
+  );
+};
+
+const _isFarmMessage = function (msg) {
+  return FARMER_REGEX.test(msg.content);
+};
+
+/**
+ * Checks if level up is valid. Prevents against cases where user goes below
+ * level threshold with newly introduced negative points logicand then
+ * increases again.
+ * @param {*} userLevel
+ * @param {*} updateValue
+ * @param {*} newMessageCount
+ */
+const _isValidLevelUp = function (userLevel, updateValue, newMessageCount) {
+  if (updateValue < 0) return false;
+
+  if (newMessageCount === 10 && userLevel === 0) return true;
+  else if (newMessageCount === 25 && userLevel === 1) return true;
+  else if (newMessageCount === 50 && userLevel === 2) return true;
+  else if (newMessageCount / BASE_MESSAGE_VALUE + 2 === userLevel) return true;
+
+  return false;
 };
 
 const runJobs = async function (client) {
