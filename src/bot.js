@@ -13,6 +13,10 @@ const {
 const { initLevelRunner } = require('./util/level-runner');
 const { initMuteRunner } = require('./util/mute-runner');
 
+require('console-stamp')(console, {
+  format: ':date(yyyy/mm/dd HH:MM:ss.l) :label',
+});
+
 const client = new Commando.Client({
   owner: process.env.MY_DISCORD_ID,
   commandPrefix: 'c ',
