@@ -6,7 +6,36 @@ const TIME_BETWEEN_LEVEL_INCREASE_IN_SECONDS = 30;
 const FARMER_REGEX = /([Ff]+[Aa]+[Rr]+[Mm]+)\w*/;
 const BASE_MESSAGE_VALUE = 100;
 const BOOSTED_MESSAGE_VALUE = 125;
-
+const FARM_RELATED_WORDS = [
+  'harvest',
+  'harvesting',
+  'plantation',
+  'crop',
+  'agriculture',
+  'agricultural',
+  'agronomic',
+  'cultivate',
+  'cultivation',
+  'barn',
+  'ranch',
+  'ranching',
+  'rancher',
+  'livestock',
+  'planting',
+  'orchard',
+  'herding',
+  'nurture',
+  'hatchery',
+  'breeding',
+  'chickens',
+  'gardening',
+  'watering',
+  'pesticide',
+  'pesticides',
+  'manure',
+  'eggs',
+  'cattle',
+];
 const _awardRoleToUser = async function (client, msg, newLevel) {
   const member = msg.member;
   let levelRoles = client.provider.get(msg.guild.id, 'levelRoles');
@@ -124,7 +153,16 @@ const _isSpamMessage = function (userLevelDoc) {
 };
 
 const _isFarmMessage = function (msg) {
-  return FARMER_REGEX.test(msg.content);
+  if (FARMER_REGEX.test(msg.content)) return true;
+
+  let farmRelatedWordInMessage = false;
+  for (const word of FARM_RELATED_WORDS) {
+    if (msg.content.includes(word)) {
+      return true;
+    }
+  }
+
+  return farmRelatedWordInMessage;
 };
 
 /**
