@@ -1,5 +1,6 @@
 const { MongoClient } = require('mongodb');
 const { convertArrayToMap } = require('./map');
+const { DiscordAPIError } = require('discord.js');
 
 const POLL_INTERVAL = 1000;
 const TIME_BETWEEN_LEVEL_INCREASE_IN_SECONDS = 30;
@@ -219,6 +220,19 @@ const runJobs = async function (client) {
           .deleteOne({ _id: item._id });
       } catch (error) {
         console.error('LEVEL RUNNER ERROR', error);
+
+        // DiscordApi Unknown Message Error... message was most likely deleted by user
+        if (error instanceof DiscordAPIError && error.code === 10008) {
+          console.log('Message not found error');
+          await mongoClient
+            .db(
+              process.env.NODE_ENV === 'development'
+                ? 'ciaraDevDb'
+                : 'ciaraDataBase'
+            )
+            .collection('levelQueue')
+            .deleteOne({ _id: item._id });
+        }
         continue;
       }
     }
