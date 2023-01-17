@@ -239,18 +239,31 @@ const runJobs = async function (client) {
 
     // 4. disconnect from db
     await mongoClient.close();
+
+    // 5. Pause 1 second and then recursive call
+    sleep(1000);
+    runJobs(client);
   } catch (error) {
     console.error(
       'LEVEL RUNNER ERROR: Failed to connect to mongo in level runner',
       error
     );
     await mongoClient.close();
+
+    sleep(1000);
+    runJobs(client);
   }
+};
+
+const sleep = function (ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 };
 
 const initLevelRunner = async function (client) {
   console.log('Level Queue Runner Initialized');
-  setInterval(runJobs, POLL_INTERVAL, client);
+  runJobs(client);
 };
 
 module.exports = {
