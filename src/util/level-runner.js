@@ -220,19 +220,16 @@ const runJobs = async function (client) {
           .deleteOne({ _id: item._id });
       } catch (error) {
         console.error('LEVEL RUNNER ERROR', error);
+        // Delete message on any errors
+        await mongoClient
+          .db(
+            process.env.NODE_ENV === 'development'
+              ? 'ciaraDevDb'
+              : 'ciaraDataBase'
+          )
+          .collection('levelQueue')
+          .deleteOne({ _id: item._id });
 
-        // DiscordApi Unknown Message Error... message was most likely deleted by user
-        if (error instanceof DiscordAPIError && error.code === 10008) {
-          console.log('Message not found error');
-          await mongoClient
-            .db(
-              process.env.NODE_ENV === 'development'
-                ? 'ciaraDevDb'
-                : 'ciaraDataBase'
-            )
-            .collection('levelQueue')
-            .deleteOne({ _id: item._id });
-        }
         continue;
       }
     }
