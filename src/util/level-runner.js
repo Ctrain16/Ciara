@@ -36,6 +36,9 @@ const FARM_RELATED_WORDS = [
   'eggs',
   'cattle',
 ];
+
+const FARM_PENALTY = -5000;
+
 const _awardRoleToUser = async function (client, msg, newLevel) {
   const member = msg.member;
   let levelRoles = client.provider.get(msg.guild.id, 'levelRoles');
@@ -97,9 +100,9 @@ const _updateUserLevel = async function (mongoClient, msg, client) {
     });
     return;
   } else if (_isFarmMessage(msg)) {
-    updateValue = -updateValue;
+    updateValue = -FARM_PENALTY;
     await msg.reply(
-      `👩‍🌾 Quit farming ${msg.channel} you noob 👨‍🌾 ... also you lost a point for this.`
+      `👩‍🌾 Quit farming ${msg.channel} you noob 👨‍🌾 ... also you 50 points for this peasant. #SkillIssue #SoundsMad`
     );
   } else if (_isSpamMessage(userLevelDoc)) {
     return; // don't aware points for spam messages
