@@ -2,9 +2,8 @@ const { MongoClient } = require('mongodb');
 const { convertArrayToMap } = require('./map');
 const { DiscordAPIError } = require('discord.js');
 
-const POLL_INTERVAL = 1000;
 const TIME_BETWEEN_LEVEL_INCREASE_IN_SECONDS = 30;
-const FARMER_REGEX = /([Ff]+[Aa]+[Rr]+[Mm]+)\w*/;
+const FARMER_REGEX = /([Ff]+[ ]*[Aa]+[ ]*[Rr]+[ ]*[Mm ]+)\w*/;
 const BASE_MESSAGE_VALUE = 100;
 const BOOSTED_MESSAGE_VALUE = 125;
 const FARM_RELATED_WORDS = [
