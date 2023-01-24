@@ -40,6 +40,7 @@ const FARM_RELATED_WORDS = [
 ];
 
 const FARM_PENALTY = -1000;
+const MEME_IN_PROTECTED_CHANNEL_PENALTY = -500;
 
 const _awardRoleToUser = async function (client, msg, newLevel) {
   const member = msg.member;
@@ -64,6 +65,7 @@ const _awardRoleToUser = async function (client, msg, newLevel) {
 const _updateUserLevel = async function (mongoClient, msg, client) {
   const authorId = msg.author.id;
   const guildId = msg.guild.id;
+  const guildSettings = client.provider.settings.get(msg.guild.id);
 
   const serverLevelsCollection = mongoClient
     .db(process.env.NODE_ENV === 'development' ? 'ciaraDevDb' : 'ciaraDataBase')
@@ -102,6 +104,25 @@ const _updateUserLevel = async function (mongoClient, msg, client) {
       level: 0,
     });
     return;
+  } else if (
+    guildSettings.protectChannels &&
+    _isMemeInProtectedChannelMessage(msg, client)
+  ) {
+    updateValue = MEME_IN_PROTECTED_CHANNEL_PENALTY;
+    await msg.reply(
+      `No memes ${msg.channel} you noob. ${
+        guildSettings.ruleChannel
+          ? `See ${guildSettings.ruleChannel} for complete rules.`
+          : ''
+      } Also you lost some points for this peasant. #SkillIssue #SoundsMad`
+    );
+    await client.registry.commands.get('textmute').run(msg, {
+      user: msg.member,
+      timeUnit: 'm',
+      numTime: '5',
+      automute: true,
+    });
+    msg.delete();
   } else if (_isFarmMessage(msg) && !authorIsOwner) {
     updateValue = FARM_PENALTY;
     await msg.reply(
@@ -169,6 +190,25 @@ const _isFarmMessage = function (msg) {
   }
 
   return farmRelatedWordInMessage;
+};
+
+const _isMemeInProtectedChannelMessage = function (msg, client) {
+  const protectedChannels = client.provider.get(
+    msg.guild.id,
+    'protectedChannels'
+  );
+  const formattedChannelId = `<#${msg.channel.id}>`;
+  if (!protectedChannels.includes(formattedChannelId)) return false;
+
+  const lowerCaseMessageContent = msg.content.toLowerCase();
+  if (
+    lowerCaseMessageContent.includes('tenor.com') ||
+    lowerCaseMessageContent.includes('cdn.discordapp')
+  ) {
+    console.log(`'${msg.author.username}' sent a meme to ${msg.channel.name}.`);
+    return true;
+  }
+  return false;
 };
 
 /**
