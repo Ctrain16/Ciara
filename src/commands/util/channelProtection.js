@@ -5,7 +5,7 @@ module.exports = class ProtectChannelCommand extends Commando.Command {
   constructor(client) {
     super(client, {
       name: 'protectchannel',
-      aliases: ['pg'],
+      aliases: ['pc'],
       group: 'util',
       memberName: 'protectchannel',
       description:

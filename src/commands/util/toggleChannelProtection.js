@@ -4,11 +4,11 @@ module.exports = class ToggleProtectChannelCommand extends Commando.Command {
   constructor(client) {
     super(client, {
       name: 'toggleprotectchannel',
-      aliases: ['tpg'],
+      aliases: ['tpc'],
       group: 'util',
       memberName: 'toggleprotectchannel',
       description: 'When enabled this protects specified channels from meme.',
-      examples: ['toggleProtectChannel (enable|disable)'],
+      examples: ['toggleprotectchannel (enable|disable)'],
 
       args: [
         {
