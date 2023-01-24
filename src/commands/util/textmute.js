@@ -89,9 +89,7 @@ module.exports = class TextMuteCommand extends Commando.Command {
 
     const userToMute = automute
       ? user
-      : msg.guild.members.cache.find(
-          (member) => `<@!${member.user.id}>` === user
-        );
+      : msg.guild.members.cache.find((member) => `<@${member.id}>` === user);
     if (userToMute.permissions.has('ADMINISTRATOR')) {
       if (!automute) msg.reply(`${user} cannot be muted as they are an admin.`);
       return;
