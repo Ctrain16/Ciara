@@ -72,17 +72,18 @@ const _updateUserLevel = async function (mongoClient, msg, client) {
     guildId,
   };
 
-  const isServerBooster = client.guilds.cache
+  const isCaptain = client.guilds.cache
     .get(guildId)
     .members.cache.get(authorId)
     .roles.cache.find((r) => {
-      return r.name === 'Server Booster';
+      return r.name === 'Captain';
     })
     ? true
     : false;
+  const authorIsOwner = client.isOwner(msg.author);
 
   let updateValue = BASE_MESSAGE_VALUE;
-  if (isServerBooster || client.isOwner(msg.author)) {
+  if (isCaptain || authorIsOwner) {
     updateValue = BOOSTED_MESSAGE_VALUE;
   }
 
@@ -99,7 +100,7 @@ const _updateUserLevel = async function (mongoClient, msg, client) {
       level: 0,
     });
     return;
-  } else if (_isFarmMessage(msg)) {
+  } else if (_isFarmMessage(msg) && !authorIsOwner) {
     updateValue = FARM_PENALTY;
     await msg.reply(
       `👩‍🌾 Quit farming ${msg.channel} you noob 👨‍🌾 ... also you lost some points for this peasant. #SkillIssue #SoundsMad`
