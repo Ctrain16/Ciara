@@ -35,6 +35,8 @@ const FARM_RELATED_WORDS = [
   'manure',
   'eggs',
   'cattle',
+  'ferm',
+  'fermier',
 ];
 
 const FARM_PENALTY = -1000;
