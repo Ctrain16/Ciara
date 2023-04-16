@@ -24,3 +24,21 @@ I originally hosted the bot on my own raspberry pi but have since moved it over 
 Discord.js is a Discord API wrapper I utilized.
 
 The documentation can be found [here](https://discord.js.org/#/).
+
+## Scripts
+
+### Deploy commands
+
+Script to register slash commands. More info [here](https://discordjs.guide/creating-your-bot/command-deployment.html#command-registration)
+
+Usage: `npm run reloadcommands` (:dev) option is for development server.
+
+### Delete commands
+
+Script to delete slash commands. More info [here](https://discordjs.guide/slash-commands/deleting-commands.html#deleting-specific-commands)
+
+Usage: `npm run deletecommand {commandId}`
+
+### Deploy Pi
+
+Simple quality of life script for me to make updating the bot on my bot easier.

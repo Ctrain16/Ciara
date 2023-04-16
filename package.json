@@ -2,9 +2,14 @@
   "name": "ciara",
   "version": "2.0.0",
   "description": "Custom discord bot",
-  "main": "",
+  "main": "src/index.ts",
   "scripts": {
-    "start": "ts-node src/Bot.ts"
+    "start": "ts-node src/index.ts",
+    "dev": "nodemon src/index.ts",
+    "reloadcommands": "ts-node bin/deploy-commands.ts 618258737890721802 prod",
+    "reloadcommands:dev": "ts-node bin/deploy-commands.ts 858202426427047976 dev",
+    "deletecommand": "ts-node bin/delete-command.ts 618258737890721802 prod",
+    "deletecommand:dev": "ts-node bin/delete-command.ts 858202426427047976 dev"
   },
   "repository": {
     "type": "git",
@@ -17,7 +22,9 @@
   },
   "homepage": "https://github.com/Ctrain16/C.I.A.R.A.#readme",
   "dependencies": {
-    "discord.js": "^14.3.0"
+    "console-stamp": "^3.1.1",
+    "discord.js": "^14.9.0",
+    "nodemon": "^2.0.22"
   },
   "devDependencies": {
     "@types/node": "^18.7.18",

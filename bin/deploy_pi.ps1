@@ -1,1 +1,1 @@
-ssh -i ~/.ssh/aws-keys.pem ubuntu@ctrainstudios.com './updateciara'
+ssh cal@192.168.1.67 -p 68 './updateciara'
