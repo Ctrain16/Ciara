@@ -41,6 +41,7 @@ client.once(Events.ClientReady, (c) => {
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
+  const interactionCreatedTimestamp = Date.now();
   if (!interaction.isChatInputCommand()) return;
 
   const command = interaction.client.commands.get(interaction.commandName);
@@ -51,7 +52,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
 
   try {
-    await command.execute(interaction);
+    await command.execute(interaction, interactionCreatedTimestamp);
   } catch (error) {
     console.error(error);
     if (interaction.replied || interaction.deferred) {
