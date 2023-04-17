@@ -1,10 +1,4 @@
-import {
-  Client,
-  GatewayIntentBits,
-  Events,
-  ActivityType,
-  Collection,
-} from 'discord.js';
+import { Client, GatewayIntentBits, Collection } from 'discord.js';
 import { commands } from './commands';
 import { events } from './events';
 import EnvValueProvider from './util/EnvValueProvider';
