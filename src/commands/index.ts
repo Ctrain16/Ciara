@@ -1,3 +1,4 @@
+import { Coinflip } from './fun/coinflip';
 import { Ping } from './util/ping';
 import { SlashCommandBuilder } from 'discord.js';
 
@@ -6,4 +7,4 @@ export interface Command {
   execute: Function;
 }
 
-export const commands: Command[] = [Ping];
+export const commands: Command[] = [Ping, Coinflip];
