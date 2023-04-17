@@ -6,8 +6,8 @@
   "scripts": {
     "start": "ts-node src/index.ts",
     "dev": "nodemon src/index.ts",
-    "reloadcommands": "ts-node bin/deploy-commands.ts 618258737890721802 prod",
-    "reloadcommands:dev": "ts-node bin/deploy-commands.ts 858202426427047976 dev",
+    "reloadcommands": "ts-node bin/deploy-commands.ts prod",
+    "reloadcommands:dev": "ts-node bin/deploy-commands.ts dev",
     "deletecommand": "ts-node bin/delete-command.ts 618258737890721802 prod",
     "deletecommand:dev": "ts-node bin/delete-command.ts 858202426427047976 dev"
   },
