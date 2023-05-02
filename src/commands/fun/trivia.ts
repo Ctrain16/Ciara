@@ -20,7 +20,7 @@ interface Question {
 export const Trivia: Command = {
   data: new SlashCommandBuilder()
     .setName('trivia')
-    .setDescription('Asks a trivia question'),
+    .setDescription('Asks a trivia question.'),
   async execute(interaction: ChatInputCommandInteraction) {
     if (!interaction.channel) {
       return await interaction.reply(
