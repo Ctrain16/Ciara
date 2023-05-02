@@ -15,7 +15,13 @@ declare module 'discord.js' {
 }
 
 const client: Client = new Client({
-  intents: [GatewayIntentBits.Guilds],
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildMembers,
+  ],
+  partials: [],
 });
 
 const envValueProvider = new EnvValueProvider();
